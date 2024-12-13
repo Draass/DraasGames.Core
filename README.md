@@ -20,7 +20,8 @@ This is a set of scripts that I commonly use in my projects.
 
 # Installation
 1. Install required dependencies
-2. Import source code or (preferred) use package manager via .git link
+2. Import source code or (preferred) use package manager
+- For installing package from git url paste https://github.com/Draass/DraasGames.Core.git?path=/Assets/Packages/DraasGames.Core
 3. Enjoy modules that are implemented and do not use modules that are not :)
 
 # Modules that are implemented
