@@ -1,0 +1,23 @@
+{
+    "name": "DraasGames.Core",
+    "rootNamespace": "",
+    "references": [
+        "DOTween.Modules",
+        "Zenject",
+        "Sirenix.OdinInspector.Modules.Unity.Addressables",
+        "UniTask",
+        "UnityEngine.UI",
+        "Unity.Addressables",
+        "Unity.TextMeshPro",
+        "Unity.ResourceManager"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

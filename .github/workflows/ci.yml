@@ -1,0 +1,55 @@
+# origin https://github.com/adrenak/upm-template/blob/master/.github/workflows/ci.yml
+# origin licensed under MIT License Copyright (c) 2020 Vatsal Ambastha
+# origin license https://github.com/adrenak/upm-template/blob/master/LICENSE
+# you can read more about how to use upm-template at https://github.com/adrenak/upm-template/
+
+name: CI
+on:
+  push:
+    branches:
+    - main
+jobs:
+  release:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Semantic Release
+      id: semantic
+      uses: cycjimmy/semantic-release-action@v3.4.2
+      with:
+        extra_plugins: |
+          @semantic-release/changelog
+          @semantic-release/git
+        branch: master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create UPM branch
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        
+        git branch -d upm &> /dev/null || echo upm branch not found
+        git subtree split -P "$PKG_ROOT" -b upm
+        git checkout upm
+        if [[ -d "Samples" ]]; then
+          git mv Samples Samples~
+          rm -f Samples.meta
+          git commit -am "fix: Samples => Samples~"
+        fi
+        git push -f -u origin upm
+      env:
+        PKG_ROOT: "Packages/DraasGames.Core"
+
+    - name: Create UPM git tag
+      if: steps.semantic.outputs.new_release_published == 'true'
+      run: |
+        git tag $TAG upm
+        git push origin --tags
+      env:
+        TAG: upm/v${{ steps.semantic.outputs.new_release_version }}
