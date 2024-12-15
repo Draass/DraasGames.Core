@@ -12,17 +12,23 @@ This is a set of scripts that I commonly use in my projects.
 - [License](#license)
 
 # Dependencies
-- Zenject
+There are 2 type of dependencies: absolute must and optional
+## Absolute must dependencies
+They are must to have. These are libraries I use in all my projects, and without them nothing will work (except for odin inspector)
+- Extenject
 - OdinInspector
 - UniTask
-- DOTween
-- NSubstitute - for unit testing 
+## Optional dependencies
+These dependencies are optional and depend on what modules you will activate
+- DOTween - for Effects module. Abstract effects are still here, but if you'd want to use some ready ones, DOTween is neccessary
+- Addressables - obviously for addressables integration 
 
 # Installation
 1. Install required dependencies
 2. Import source code or (preferred) use package manager
 - For installing package from git url paste https://github.com/Draass/DraasGames.Core.git?path=/Assets/Packages/DraasGames.Core
-3. Enjoy modules that are implemented and do not use modules that are not :)
+- Or download and import unity package from releases
+3. Enjoy 
 
 # Modules that are implemented
 1. ViewRouter is usable except of Preloading functionality and addressables support, which will be added later
