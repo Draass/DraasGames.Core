@@ -8,7 +8,7 @@ using UnityEngine;
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
 {
     [CreateAssetMenu(menuName = "DraasGames/UI/ViewContainer", fileName = "View Container")]
-    public class ResourcesViewContainer : ViewContainer
+    public class ResourcesViewContainer : SerializedScriptableObject
     {
         [SerializeField, BoxGroup("Add View")]
         private IView _viewToAdd;
@@ -16,14 +16,16 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
         [SerializeField]
         private Dictionary<Type, string> _viewPathsPair = new Dictionary<Type, string>();
 
+#if UNITY_EDITOR  
         private IViewPathRetrieveStrategy _pathRetrieveStrategy = new ResourcesViewPathRetrieveStrategy();
-         
-        public override string GetViewPath<T>()
+#endif
+        
+        public string GetViewPath<T>()
         {
             return _viewPathsPair[typeof(T)];
         }
         
-        public override string GetViewPath(Type viewType)
+        public string GetViewPath(Type viewType)
         {
             if (!viewType.IsAssignableFrom(typeof(MonoBehaviour)))
                 throw new ArgumentException($"Type {viewType} is not a MonoBehaviour");
@@ -34,13 +36,14 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
             return _viewPathsPair[viewType];
         }
         
+#if UNITY_EDITOR  
         [Button, BoxGroup("Add View")]
         private void EditorAddView()
         {
             AddView(_viewToAdd);
         }
         
-        public override void AddView(IView view)
+        public void AddView(IView view)
         {
             Type derivedType = view.GetType();
             
@@ -55,5 +58,6 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
                 _viewPathsPair.Add(derivedType, path);
             }
         }
+#endif
     }
 }

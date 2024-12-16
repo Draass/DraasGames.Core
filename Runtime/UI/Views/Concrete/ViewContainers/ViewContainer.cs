@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
 {
+    [Obsolete]
     public abstract class ViewContainer : SerializedScriptableObject
     {
         public abstract string GetViewPath<T>() where T : MonoBehaviour, IView;
