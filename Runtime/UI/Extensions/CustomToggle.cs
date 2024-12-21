@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 namespace DraasGames.Core.Runtime.UI.Extensions
 {
-    [AddComponentMenu("UI/DraasGames/CustomToggle")]
+    [AddComponentMenu("DraasGames/UI/CustomToggle")]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
     public class CustomToggle : CustomSelectable, IPointerClickHandler, ISubmitHandler
@@ -29,6 +29,7 @@ namespace DraasGames.Core.Runtime.UI.Extensions
         public bool IsOn { get; private set; }
         
         [SerializeField, BoxGroup("Options"), HideIf("_isNativeEffects")] 
+        [Tooltip("Toggle disables single object or switches between two objects")]
         private ToggleMode _toggleMode;
         
         [SerializeField, ShowIf("@_toggleMode == ToggleMode.ToggleSingle || _toggleMode == ToggleMode.ToggleBetween"),
@@ -107,43 +108,52 @@ namespace DraasGames.Core.Runtime.UI.Extensions
             switch (_toggleMode)
             {
                 case ToggleMode.ToggleSingle:
-
-                    if (_switchEffect == SwitchEffect.Custom)
-                    {
-                        if (IsOn)
-                        {
-                            _toggleSwitchEffect.Play();
-                        }
-                        else
-                        {
-                            _toggleInactiveSwitchEffect.Play();
-                        }
-                    }
-                    else if (_switchEffect == SwitchEffect.None)
-                    {
-                        _activeGraphic?.SetActive(IsOn);
-                    }
+                    ToggleSingeOnEffect();
                     break;
                 case ToggleMode.ToggleBetween:
-                    if(_switchEffect == SwitchEffect.Custom)
-                    {
-                        if (IsOn)
-                        {
-                            _toggleSwitchEffect.Play();
-                        }
-                        else
-                        {
-                            _toggleInactiveSwitchEffect.Play();
-                        }
-                    }
-                    else if (_switchEffect == SwitchEffect.None)
-                    {
-                        _activeGraphic?.SetActive(IsOn);
-                        _inactiveGraphic?.SetActive(!IsOn);
-                    }
+                    ToggleBetweenOnEffect();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+        
+        private void ToggleSingeOnEffect()
+        {
+            if (_switchEffect == SwitchEffect.Custom)
+            {
+                if (IsOn)
+                {
+                    _toggleSwitchEffect.Play();
+                }
+                else
+                {
+                    _toggleInactiveSwitchEffect.Play();
+                }
+            }
+            else if (_switchEffect == SwitchEffect.None)
+            {
+                _activeGraphic?.SetActive(IsOn);
+            }
+        }
+        
+        private void ToggleBetweenOnEffect()
+        {
+            if(_switchEffect == SwitchEffect.Custom)
+            {
+                if (IsOn)
+                {
+                    _toggleSwitchEffect.Play();
+                }
+                else
+                {
+                    _toggleInactiveSwitchEffect.Play();
+                }
+            }
+            else if (_switchEffect == SwitchEffect.None)
+            {
+                _activeGraphic?.SetActive(IsOn);
+                _inactiveGraphic?.SetActive(!IsOn);
             }
         }
     }
