@@ -1,11 +1,11 @@
-﻿#if DRAASGAMES_ADDRESSABLES_MODULE
+﻿#if DRAASGAMES_EFFECTS_MODULE
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using DraasGames.Runtime.UI.Effects.Abstract;
+using DraasGames.Core.Runtime.UI.Effects.Abstract;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace DraasGames.Runtime.UI.Effects.Concrete
+namespace DraasGames.Core.Runtime.UI.Effects.Concrete
 {
     public class MoveBetweenEffect : Effect
     {
