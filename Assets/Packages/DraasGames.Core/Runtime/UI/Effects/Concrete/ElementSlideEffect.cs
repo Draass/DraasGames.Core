@@ -1,13 +1,13 @@
-﻿#if DRAASGAMES_ADDRESSABLES_MODULE
+﻿#if DRAASGAMES_EFFECTS_MODULE
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using DraasGames.Runtime.UI.Effects.Abstract;
-using DraasGames.Runtime.UI.Effects.Data;
+using DraasGames.Core.Runtime.UI.Effects.Abstract;
+using DraasGames.Core.Runtime.UI.Effects.Data;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace DraasGames.Runtime.UI.Effects.Concrete
+namespace DraasGames.Core.Runtime.UI.Effects.Concrete
 {
     [AddComponentMenu("DraasGames/UI/Effects/ElementSlideEffect")]
     public class ElementSlideEffect : Effect
