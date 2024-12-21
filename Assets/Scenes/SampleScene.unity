@@ -1129,73 +1129,69 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 2137097573}
   _isNativeEffects: 0
   _normalEffect:
-    rid: 3612491013643042861
+    rid: 3612491013643042868
   _highlightedEffect:
-    rid: 3612491013643042862
+    rid: 3612491013643042869
   _selectedEffect:
-    rid: 3612491013643042863
+    rid: 3612491013643042870
   _pressedEffect:
-    rid: 3612491013643042864
+    rid: 3612491013643042871
   _disabledEffect:
-    rid: 3612491013643042865
+    rid: 3612491013643042872
+  _hasAlphaThreshold: 0
+  _hitImage: {fileID: 0}
+  _alphaThreshold: 1
+  _toggleMode: 0
+  _activeGraphic: {fileID: 762657586}
+  _inactiveGraphic: {fileID: 0}
+  _switchEffect: 0
   _toggleSwitchEffect:
     rid: -2
   _toggleInactiveSwitchEffect:
     rid: -2
-  _activeGraphic: {fileID: 762657586}
-  _inactiveGraphic: {fileID: 0}
-  _switchEffect: 0
-  _hasAlphaThreshold: 0
-  _hitImage: {fileID: 0}
-  _alphaThreshold: 1
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 3612491013643042861
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
+    - rid: 3612491013643042868
+      type: {class: NonMonoFadeEffect, ns: DraasGames.Core.Runtime.UI.Effects.Concrete,
         asm: DraasGames.Core}
       data:
-        _target: {fileID: 0}
-        _targetScale: 1.5
-        _duration: 0.1
-        _ease: 1
-    - rid: 3612491013643042862
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
+        _graphic: {fileID: 0}
+        _toValue: 0
+        _duration: 0.2
+    - rid: 3612491013643042869
+      type: {class: NonMonoFadeEffect, ns: DraasGames.Core.Runtime.UI.Effects.Concrete,
         asm: DraasGames.Core}
       data:
-        _target: {fileID: 0}
-        _targetScale: 1.5
-        _duration: 0.1
-        _ease: 1
-    - rid: 3612491013643042863
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
+        _graphic: {fileID: 0}
+        _toValue: 0
+        _duration: 0.2
+    - rid: 3612491013643042870
+      type: {class: NonMonoFadeEffect, ns: DraasGames.Core.Runtime.UI.Effects.Concrete,
         asm: DraasGames.Core}
       data:
-        _target: {fileID: 0}
-        _targetScale: 1.5
-        _duration: 0.1
-        _ease: 1
-    - rid: 3612491013643042864
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
+        _graphic: {fileID: 0}
+        _toValue: 0
+        _duration: 0.2
+    - rid: 3612491013643042871
+      type: {class: NonMonoFadeEffect, ns: DraasGames.Core.Runtime.UI.Effects.Concrete,
         asm: DraasGames.Core}
       data:
-        _target: {fileID: 0}
-        _targetScale: 1.5
-        _duration: 0.1
-        _ease: 1
-    - rid: 3612491013643042865
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
+        _graphic: {fileID: 0}
+        _toValue: 0
+        _duration: 0.2
+    - rid: 3612491013643042872
+      type: {class: NonMonoFadeEffect, ns: DraasGames.Core.Runtime.UI.Effects.Concrete,
         asm: DraasGames.Core}
       data:
-        _target: {fileID: 0}
-        _targetScale: 1.5
-        _duration: 0.1
-        _ease: 1
+        _graphic: {fileID: 0}
+        _toValue: 0
+        _duration: 0.2
 --- !u!1 &1792886190
 GameObject:
   m_ObjectHideFlags: 0
@@ -1208,8 +1204,6 @@ GameObject:
   - component: {fileID: 1792886194}
   - component: {fileID: 1792886193}
   - component: {fileID: 1792886192}
-  - component: {fileID: 1792886196}
-  - component: {fileID: 1792886195}
   m_Layer: 5
   m_Name: Custom Button (1)
   m_TagString: Untagged
@@ -1278,66 +1272,25 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 1792886193}
-  onClick:
-    m_PersistentCalls:
-      m_Calls: []
   _isNativeEffects: 0
   _normalEffect:
-    rid: 3612490978710519853
+    rid: -2
   _highlightedEffect:
-    rid: 3612490978710519854
+    rid: -2
   _selectedEffect:
-    rid: 3612490978710519855
+    rid: -2
   _pressedEffect:
-    rid: 3612490978710519856
+    rid: -2
   _disabledEffect:
-    rid: 3612490978710519857
+    rid: -2
   _hasAlphaThreshold: 0
   _hitImage: {fileID: 0}
   _alphaThreshold: 1
   references:
     version: 2
     RefIds:
-    - rid: 3612490978710519853
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
-        asm: DraasGames.Core}
-      data:
-        _target: {fileID: 1792886191}
-        _targetScale: 1.5
-        _duration: 0.2
-        _ease: 1
-    - rid: 3612490978710519854
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
-        asm: DraasGames.Core}
-      data:
-        _target: {fileID: 1792886191}
-        _targetScale: 1.5
-        _duration: 0.2
-        _ease: 1
-    - rid: 3612490978710519855
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
-        asm: DraasGames.Core}
-      data:
-        _target: {fileID: 1792886191}
-        _targetScale: 1.5
-        _duration: 0.2
-        _ease: 1
-    - rid: 3612490978710519856
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
-        asm: DraasGames.Core}
-      data:
-        _target: {fileID: 1792886191}
-        _targetScale: 1.5
-        _duration: 0.2
-        _ease: 1
-    - rid: 3612490978710519857
-      type: {class: NonMonoScaleEffect, ns: DraasGames.Core.Runtime.UI.Extensions,
-        asm: DraasGames.Core}
-      data:
-        _target: {fileID: 1792886191}
-        _targetScale: 1.5
-        _duration: 0.2
-        _ease: 1
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &1792886193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1376,38 +1329,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1792886190}
   m_CullTransparentMesh: 1
---- !u!114 &1792886195
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1792886190}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6afc4acb0267e9449f0cf373aa0c8b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _image: {fileID: 1792886193}
-  _initialValue: 1
-  _finalValue: 0
-  _duration: 0.5
---- !u!114 &1792886196
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1792886190}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6afc4acb0267e9449f0cf373aa0c8b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _image: {fileID: 1792886193}
-  _initialValue: 0
-  _finalValue: 1
-  _duration: 0.5
 --- !u!1 &1824649873
 GameObject:
   m_ObjectHideFlags: 0

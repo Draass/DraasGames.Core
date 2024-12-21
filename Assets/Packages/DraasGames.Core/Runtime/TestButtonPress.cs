@@ -10,7 +10,7 @@ public class TestButtonPress : MonoBehaviour
     private void Start()
     {
         _button.onClick.AddListener(OnButtonClick);
-        _customButton.onClick.AddListener(OnButtonClick);
+        _customButton.OnClick += (OnButtonClick);
     }
 
     private void OnButtonClick()

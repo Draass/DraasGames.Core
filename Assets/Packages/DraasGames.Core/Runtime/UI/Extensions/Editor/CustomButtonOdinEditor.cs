@@ -1,8 +1,7 @@
-﻿using Sirenix.OdinInspector.Editor;
-using Sirenix.OdinInspector.Editor.Internal.UIToolkitIntegration;
+using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 
-namespace DraasGames.Core.Runtime.UI.Extensions
+namespace DraasGames.Core.Runtime.UI.Extensions.Editor
 {
     [CustomEditor(typeof(CustomButton))]
     public class CustomButtonOdinEditor : OdinEditor
