@@ -17,7 +17,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         public event Action OnViewShow;
         public event Action OnViewHide;
 
-        private void Awake()
+        protected virtual void Awake()
         {
             Canvas = GetComponent<Canvas>();
             Raycaster = GetComponent<GraphicRaycaster>();
