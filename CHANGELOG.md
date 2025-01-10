@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1] - 2025-10-01
+
+### Fixed
+- Not interactable toggles are now actually not interactable
+
 ## [0.2.0] - 2024-21-12
 
 ### Added
@@ -10,7 +15,7 @@
 
 ## [0.1.2] - 2024-16-12
 
-### Fixes
+### Fixed
 - Fix build error in ResourcesViewContainer
 
 ## [0.1.1] - 2024-13-12

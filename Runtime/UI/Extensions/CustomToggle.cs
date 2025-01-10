@@ -55,11 +55,17 @@ namespace DraasGames.Core.Runtime.UI.Extensions
     
         public void OnPointerClick(PointerEventData eventData)
         {
+            if(!IsInteractable() || !IsActive())
+                return;
+            
             SetIsOn(!IsOn);
         }
 
         public void OnSubmit(BaseEventData eventData)
         {
+            if(!IsInteractable() || !IsActive())
+                return;
+            
             SetIsOn(!IsOn);
         }
         
