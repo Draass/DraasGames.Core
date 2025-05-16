@@ -25,4 +25,13 @@ namespace DraasGames.Core.Runtime.UI.SlideCarousel
             }
         }
     }
+
+    // TODO
+    // public class BaseCarouselItem : MonoBehaviour
+    // {
+    //     public bool IsSelected { get; private set; }
+    //     
+    //     public virtual void Select() => IsSelected = true;
+    //     public virtual void Deselect() => IsSelected = false;
+    // }
 }
