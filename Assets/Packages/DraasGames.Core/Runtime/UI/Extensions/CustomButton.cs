@@ -7,7 +7,7 @@ namespace DraasGames.Core.Runtime.UI.Extensions
     /// <summary>
     /// Custom button with option to mimic native button behaviour or override with custom animations
     /// </summary>
-    [AddComponentMenu("DraasGames/UI/CustomToggle")]
+    [AddComponentMenu("DraasGames/UI/CustomButton")]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
     public class CustomButton : CustomSelectable, IPointerClickHandler, ISubmitHandler

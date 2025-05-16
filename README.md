@@ -32,9 +32,10 @@ These dependencies are optional and depend on what modules you will activate
 
 # Modules that are implemented
 1. ViewRouter is usable except of Preloading functionality and addressables support, which will be added later
-2. Effects
-3. SlideCarousel (will be moved to UI Extensions later)
-4. StateMachineAsync
+2. CustomButton and CustomToggle for enabling use of custom effects and enhanching toggle functionality
+3. Effects
+4. SlideCarousel (will be moved to UI Extensions later)
+5. StateMachineAsync
 
 ## ViewRouter
 ViewRouter is used for handling view switching.
@@ -50,6 +51,16 @@ ViewRouter is used for handling view switching.
 ``` csharp
 IViewRouter.Show<T>(IView view);
 ```
+
+## CustomButton and CustomToggle
+These are both inherited from selectables, so they support all native elemnts features and give you even more
+
+### How to use
+- For CustomButton - just subscribe to OnClick (not unity event btw)
+- For CustomToggle - same goes for OnValueChanged, not unity event again
+
+### API
+
 
 ## StateMachineAsync
 StateMachineAsync is a state machine implementation that uses UniTask to handle async operations.

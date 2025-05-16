@@ -28,7 +28,7 @@ namespace DraasGames.Core.Runtime.UI.Extensions
         [ShowInInspector, ReadOnly, BoxGroup("Debug")]
         public bool IsOn { get; private set; }
         
-        [SerializeField, BoxGroup("Options"), HideIf("_isNativeEffects")] 
+        [SerializeField, BoxGroup("Options")] 
         [Tooltip("Toggle disables single object or switches between two objects")]
         private ToggleMode _toggleMode;
         
@@ -44,22 +44,28 @@ namespace DraasGames.Core.Runtime.UI.Extensions
         private SwitchEffect _switchEffect;
         
         [SerializeReference, BoxGroup("Options/Switch Mode"), 
-         ShowIf("@_isNativeEffects == false && _switchEffect == SwitchEffect.Custom"), 
+         ShowIf("@_switchEffect == SwitchEffect.Custom"), 
          Required, Title("Toggle Active Switch Effect"), HideLabel]
         private NonMonoEffect _toggleSwitchEffect;
         
         [SerializeReference, BoxGroup("Options/Switch Mode"), 
-         ShowIf("@_isNativeEffects == false && _switchEffect == SwitchEffect.Custom"), 
+         ShowIf("@_switchEffect == SwitchEffect.Custom"), 
          Required, Title("Toggle InActive Switch Effect"), HideLabel]
         private NonMonoEffect _toggleInactiveSwitchEffect;
     
         public void OnPointerClick(PointerEventData eventData)
         {
+            if(!IsInteractable() || !IsActive())
+                return;
+            
             SetIsOn(!IsOn);
         }
 
         public void OnSubmit(BaseEventData eventData)
         {
+            if(!IsInteractable() || !IsActive())
+                return;
+            
             SetIsOn(!IsOn);
         }
         
