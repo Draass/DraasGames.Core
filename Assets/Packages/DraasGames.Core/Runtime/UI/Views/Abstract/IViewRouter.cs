@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace DraasGames.Core.Runtime.UI.Views.Abstract
 {
@@ -8,6 +9,11 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// Show a regular view, hiding the current one.
         /// </summary>
         public void Show<T>() where T : MonoBehaviour, IView;
+
+        /// <summary>
+        /// Show a regular view async, hiding the current one.
+        /// </summary>
+        public UniTask ShowAsync<T>() where T : MonoBehaviour, IView;
         
         /// <summary>
         /// Show a modal view without hiding the current one.
@@ -15,10 +21,24 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         public void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView;
         
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public UniTask ShowModalAsync<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView;
+        
+        /// <summary>
         /// Show a persistent view without hiding the current one. Call Hide manually to hide it.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         public void ShowPersistent<T>() where T : MonoBehaviour, IView;
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public UniTask ShowPersistentAsync<T>() where T : MonoBehaviour, IView;
         
         /// <summary>
         /// Hide a specific view.
