@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3] - 2025-16-05
+
+### Fixed
+- Fixed using subsequent Show and ShowModal in ViewRouter.cs causing exception 
+
+### Fixed
+- Not interactable toggles are now actually not interactable
+
 ## [0.2.1] - 2025-10-01
 
 ### Fixed
