@@ -5,6 +5,7 @@ using DraasGames.Core.Runtime.UI.Views.Abstract;
 using UnityEditor;
 using UnityEngine;
 using Zenject;
+using Object = UnityEngine.Object;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete
 {
@@ -37,7 +38,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         public async UniTask PreloadView<T>() where T : MonoBehaviour, IView
         {
             throw new NotImplementedException();
-            
+
             var viewType = typeof(T);
 
             if (_cachedViews.ContainsKey(viewType))
@@ -61,13 +62,21 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             // Сначала надо создать, потом спрятать
             Type currentViewType = null;
 
+            HideAllModalViews();
+
             if (_viewStack.Count > 0)
+            {
                 currentViewType = _viewStack.Peek();
+            }
 
             CreateView<T>().Forget();
+            
+            _viewStack.Push(typeof(T));
 
             if (currentViewType != null)
+            {
                 HideRegularView(currentViewType);
+            }
         }
 
         /// <summary>
@@ -89,15 +98,6 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         /// <typeparam name="T"></typeparam>
         public async void ShowPersistent<T>() where T : MonoBehaviour, IView
         {
-            // if (!_cachedViews.TryGetValue(typeof(T), out var targetView))
-            // {
-            //     var view = await _viewFactory.Create<T>();
-            //     view.Show();
-            // }
-            // else
-            // {
-            //     targetView.Show();
-            // }
             var persistentView = await CreateView<T>();
 
             _persistentViewStack.Push(persistentView.GetType());
@@ -107,9 +107,9 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         {
             if (_cachedViews.TryGetValue(typeof(T), out var cachedView))
             {
-                _viewStack.Push(cachedView.GetType());
                 _activeViews.Add(typeof(T), cachedView);
                 cachedView.Show();
+                
                 return cachedView;
             }
 
@@ -117,7 +117,6 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             targetView.Show();
 
-            _viewStack.Push(targetView.GetType());
             _activeViews.Add(typeof(T), targetView);
 
             return targetView;
@@ -129,38 +128,12 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             if (!_cachedViews.TryGetValue(viewType, out var targetView))
             {
-                //targetView = await _viewFactory.Create<T>();
-
-
-                // // Use reflection to call the parameterless generic method
-                // var createMethod = typeof(IViewFactory)
-                //     .GetMethod("CreateAsync", Type.EmptyTypes)
-                //     .MakeGenericMethod(viewType);
-                //
-                // if (createMethod == null)
-                // {
-                //     throw new InvalidOperationException($"CreateAsync method not found for type {viewType}.");
-                // }
-                //
-                // var task = createMethod.Invoke(_viewFactory, null);
-                //
-                // // Await the UniTask and extract the result (IView instance)
-                // targetView = await (UniTask<IView>)task;
-                //
-                // _cachedViews.Add(viewType, targetView);
-                // targetView.Hide(); // Ensure the view is hidden initially
             }
 
             targetView = await _viewFactory.Create(viewType);
 
-            if(targetView == null)
+            if (targetView == null)
                 throw new InvalidOperationException($"View {viewType} is not created");
-            
-            // if (!modal)
-            // {
-            //     // Hide current view
-            //     HideCurrentView();
-            // }
 
             targetView.Show();
 
@@ -180,9 +153,6 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
         private void HideCurrentView()
         {
-            // First, hide any active modal views
-            //HideAllModalViews();
-
             if (_viewStack.Count == 0)
                 return;
 
@@ -211,7 +181,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                 currentView.Hide();
                 _activeViews.Remove(viewType);
                 OnViewHidden?.Invoke(viewType);
-                
+
                 Destroy(currentView);
                 // TODO Do not destroy the view if it's cached
             }
@@ -227,7 +197,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                     modalView.Hide();
                     OnViewHidden?.Invoke(modalViewType);
                     _activeViews.Remove(modalViewType);
-                    
+
                     Destroy(modalView);
                 }
             }
@@ -254,34 +224,37 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         public void Hide<T>() where T : MonoBehaviour, IView
         {
             var viewType = typeof(T);
-            if (_activeViews.TryGetValue(viewType, out var view))
+
+            if (!_activeViews.TryGetValue(viewType, out var view))
             {
-                view.Hide();
-                OnViewHidden?.Invoke(viewType);
-
-                _activeViews.Remove(viewType);
-
-                // Remove from the correct stack
-                if (_modalViewStack.Contains(viewType))
-                {
-                    RemoveViewFromStack(_modalViewStack, viewType);
-                }
-                else if (_viewStack.Contains(viewType))
-                {
-                    RemoveViewFromStack(_viewStack, viewType);
-                }
-                else if (_persistentViewStack.Contains(viewType))
-                {
-                    RemoveViewFromStack(_persistentViewStack, viewType);
-                }
-
-                //if(_cachedViews)
-
-                Destroy(view);
-
-                // todo исправить для тестов, а то ловит ошибку
-                // Do not destroy the view if it is cached
+                return;
             }
+            
+            view.Hide();
+            OnViewHidden?.Invoke(viewType);
+
+            _activeViews.Remove(viewType);
+
+            // Remove from the correct stack
+            if (_modalViewStack.Contains(viewType))
+            {
+                RemoveViewFromStack(_modalViewStack, viewType);
+            }
+            else if (_viewStack.Contains(viewType))
+            {
+                RemoveViewFromStack(_viewStack, viewType);
+            }
+            else if (_persistentViewStack.Contains(viewType))
+            {
+                RemoveViewFromStack(_persistentViewStack, viewType);
+            }
+
+            //if(_cachedViews)
+
+            Destroy(view);
+
+            // todo исправить для тестов, а то ловит ошибку
+            // Do not destroy the view if it is cached
         }
 
         private void Hide(Type viewType)
@@ -291,7 +264,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                 view.Hide();
                 OnViewHidden?.Invoke(viewType);
                 _activeViews.Remove(viewType);
-                
+
                 Destroy(view);
             }
         }
@@ -352,7 +325,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         {
             foreach (var view in _cachedViews.Values)
             {
-                GameObject.Destroy((view as MonoBehaviour).gameObject);
+                Object.Destroy((view as MonoBehaviour).gameObject);
             }
 
             _cachedViews.Clear();
@@ -371,11 +344,11 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 #if(UNITY_EDITOR)
             if (EditorApplication.isPlaying)
             {
-                GameObject.Destroy((view as MonoBehaviour).gameObject);
+                Object.Destroy((view as MonoBehaviour).gameObject);
             }
             else
             {
-                GameObject.DestroyImmediate((view as MonoBehaviour).gameObject);
+                Object.DestroyImmediate((view as MonoBehaviour).gameObject);
             }
 #else
             GameObject.Destroy((view as MonoBehaviour).gameObject);
