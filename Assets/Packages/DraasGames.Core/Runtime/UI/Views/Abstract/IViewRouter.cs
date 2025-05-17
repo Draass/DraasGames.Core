@@ -13,7 +13,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// <summary>
         /// Show a regular view async, hiding the current one.
         /// </summary>
-        public UniTask ShowAsync<T>() where T : MonoBehaviour, IView;
+        public UniTask<T> ShowAsync<T>() where T : MonoBehaviour, IView;
         
         /// <summary>
         /// Show a modal view without hiding the current one.
@@ -25,7 +25,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public UniTask ShowModalAsync<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView;
+        public UniTask<T> ShowModalAsync<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView;
         
         /// <summary>
         /// Show a persistent view without hiding the current one. Call Hide manually to hide it.
@@ -38,7 +38,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public UniTask ShowPersistentAsync<T>() where T : MonoBehaviour, IView;
+        public UniTask<T> ShowPersistentAsync<T>() where T : MonoBehaviour, IView;
         
         /// <summary>
         /// Hide a specific view.

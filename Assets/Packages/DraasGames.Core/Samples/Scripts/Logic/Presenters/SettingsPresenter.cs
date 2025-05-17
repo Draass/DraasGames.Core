@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.PresenterNavigationService.Abstract;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
+using DraasGames.Core.Samples.Scripts.UI.Views;
 
 namespace DraasGames.Core.Samples.Scripts.Logic.Presenters
 {

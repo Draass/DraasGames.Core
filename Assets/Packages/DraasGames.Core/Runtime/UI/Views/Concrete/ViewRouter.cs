@@ -56,7 +56,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
         public void Show<T>() where T : MonoBehaviour, IView => ShowAsync<T>().Forget();
 
-        public async UniTask ShowAsync<T>() where T : MonoBehaviour, IView
+        public async UniTask<T> ShowAsync<T>() where T : MonoBehaviour, IView
         {
             HideAllModalViews();
 
@@ -70,12 +70,14 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             }
 
             OnViewShown?.Invoke(newView.GetType());
+            
+            return (T)newView;
         }
 
         public void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView =>
             ShowModalAsync<T>(closeOtherModals).Forget();
 
-        public async UniTask ShowModalAsync<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView
+        public async UniTask<T> ShowModalAsync<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView
         {
             if (closeOtherModals)
             {
@@ -85,17 +87,21 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             var modalView = await CreateViewAsync<T>();
             _modalViewStack.Push(modalView.GetType());
             OnViewShown?.Invoke(modalView.GetType());
+
+            return (T)modalView;
         }
 
 
         public void ShowPersistent<T>() where T : MonoBehaviour, IView =>
             ShowPersistentAsync<T>().Forget();
 
-        public async UniTask ShowPersistentAsync<T>() where T : MonoBehaviour, IView
+        public async UniTask<T> ShowPersistentAsync<T>() where T : MonoBehaviour, IView
         {
             var persistentView = await CreateViewAsync<T>();
             _persistentViewStack.Push(persistentView.GetType());
             OnViewShown?.Invoke(persistentView.GetType());
+            
+            return (T)persistentView;
         }
 
         private async UniTask<IView> CreateViewAsync<T>() where T : MonoBehaviour, IView
