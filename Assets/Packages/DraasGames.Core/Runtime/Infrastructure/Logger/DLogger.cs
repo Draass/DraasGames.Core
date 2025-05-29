@@ -11,6 +11,16 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
         {
             Loggers.Add(logger);
         }
+
+        public void RemoveLogger(ILoggerService logger)
+        {
+            Loggers.Remove(logger);
+        }
+
+        public void RemoveAllLoggers()
+        {
+            Loggers.Clear();
+        }
         
         public static void Log(string message, object sender = null)
         {

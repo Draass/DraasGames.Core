@@ -15,7 +15,12 @@ namespace DraasGames.Core.Samples.Scripts.Logic.Presenters
         
         public async UniTask ShowAsync()
         {
-            var view = await _viewRouter.ShowAsync<OverlayView>();
+            var view = await _viewRouter.ShowPersistentAsync<OverlayView>();
+        }
+
+        private void DisplayCustomMessage(string message)
+        {
+            
         }
     }
 }

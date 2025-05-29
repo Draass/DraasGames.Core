@@ -7,7 +7,7 @@ using Zenject;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders
 {
-    public class ResourcesViewProviderAsync : IViewProviderAsync
+    public class ResourcesViewProviderAsync : IViewProvider
     {
         private readonly ResourcesViewContainer _resourcesViewContainer;
         

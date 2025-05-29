@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace DraasGames.Core.Runtime.UI.Views.Abstract
@@ -8,6 +9,8 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// <summary>
         /// Show a regular view, hiding the current one.
         /// </summary>
+        [Obsolete("This method is obsolete and is replaced with async API. " +
+                  "Consider using ShowAsync instead.")]
         public void Show<T>() where T : MonoBehaviour, IView;
 
         /// <summary>
@@ -16,8 +19,10 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         public UniTask<T> ShowAsync<T>() where T : MonoBehaviour, IView;
         
         /// <summary>
-        /// Show a modal view without hiding the current one.
+        /// Show a modal view
         /// </summary>
+        [Obsolete("This method is obsolete and is replaced with async API. " +
+                  "Consider using ShowModalAsync instead.")]
         public void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView;
         
         /// <summary>
@@ -31,6 +36,8 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// Show a persistent view without hiding the current one. Call Hide manually to hide it.
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        [Obsolete("This method is obsolete and is replaced with async API. " +
+                  "Consider using ShowPersistentAsync instead.")]
         public void ShowPersistent<T>() where T : MonoBehaviour, IView;
         
         /// <summary>
@@ -51,11 +58,13 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// </summary>
         public void HideAllModalViews();
         
+        // TODO add async overload
         /// <summary>
         /// Return to the previous view and close all modal views by default.
         /// </summary>
         public void Return(bool closeOtherModals = true);
         
+        // TODO add async overload
         /// <summary>
         /// Return to the previous modal view or close the current modal view if there is no previous modal view.
         /// </summary>

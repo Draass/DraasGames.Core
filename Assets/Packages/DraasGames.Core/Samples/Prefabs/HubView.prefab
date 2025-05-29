@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 3415946243094328857}
   - component: {fileID: 3556870427264268283}
   m_Layer: 5
-  m_Name: MainView
+  m_Name: HubView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -542,6 +542,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4f6f6229e5740b5872000cc56a771d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _showSettingsButton: {fileID: 5409312109824709067}
 --- !u!1 &9027808778334866701
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,11 +687,5 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes:
     - Name: _type
-      Entry: 7
-      Data: 0|System.RuntimeType, mscorlib
-    - Name: 
-      Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.MainView, Assembly-CSharp
-    - Name: 
-      Entry: 8
+      Entry: 6
       Data: 

@@ -8,6 +8,11 @@ namespace DraasGames.Core.Samples.Scripts.Logic.Presenters
     internal sealed class SettingsPresenter : IPresenter
     {
         private readonly IViewRouter _viewRouter;
+
+        public SettingsPresenter(IViewRouter viewRouter)
+        {
+            _viewRouter = viewRouter;
+        }
         
         public async UniTask ShowAsync()
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DraasGames.Core.Runtime.UI.Views.Abstract
 {
-    public interface IViewProviderAsync
+    public interface IViewProvider
     {
         /// <summary>
         /// Get view of type T

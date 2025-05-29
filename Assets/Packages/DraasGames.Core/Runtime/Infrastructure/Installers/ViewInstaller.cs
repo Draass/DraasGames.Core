@@ -1,9 +1,11 @@
 ﻿#if DRAASGAMES_ADDRESSABLES_MODULE
-using DraasGames.Runtime.Addressables;
+//using DraasGames.Runtime.Addressables;
 #endif
+using DraasGames.Core.Runtime.UI.PresenterNavigationService.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Zenject;
 
@@ -24,8 +26,6 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         [SerializeField] private AddressablesViewContainer _viewContainer;
 #endif
 
-        [SerializeField] private ResourcesViewContainer _resourcesViewContainer;
-        
         public override void InstallBindings()
         {
             Container
@@ -37,6 +37,8 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                 .BindInterfacesAndSelfTo<ViewRouter>()
                 .FromNew()
                 .AsSingle();
+
+            Container.BindInterfacesTo<PresenterNavigationService>().AsSingle();
             
             BindViewRetrieval();
         }
@@ -47,33 +49,27 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             if (_viewRetrievalMode == ViewRetrievalMode.Addressables)
             {
                 Container
-                    .Bind<AddressablesViewContainer>()
-                    .FromInstance(_viewContainer)
+                    .Bind<AddressablesViewProvider>()
+                    .FromInstance(_viewProvider)
                     .AsSingle();
 
                 Container
-                    .BindInterfacesTo<AddressablesViewProviderAsync>()
+                    .BindInterfacesTo<AddressablesViewContainer>()
                     .FromNew()
                     .AsSingle();
             }
-            else if(_viewRetrievalMode == ViewRetrievalMode.Resources)
-            {
-                Container
-                    .Bind<ResourcesViewContainer>()
-                    .FromInstance(_resourcesViewContainer)
-                    .AsSingle();
-                
-                Container
-                    .BindInterfacesTo<ResourcesViewProviderAsync>()
-                    .FromNew()
-                    .AsSingle();
-            }
-            
-            
-            Container
-                .Bind<AddressablesManager>()
-                .FromNewComponentOnNewGameObject()
-                .AsSingle();
+            // else if(_viewRetrievalMode == ViewRetrievalMode.Resources)
+            // {
+            //     Container
+            //         .Bind<ResourcesViewContainer>()
+            //         .FromInstance(_resourcesViewContainer)
+            //         .AsSingle();
+            //     
+            //     Container
+            //         .BindInterfacesTo<ResourcesViewProviderAsync>()
+            //         .FromNew()
+            //         .AsSingle();
+            // }
 #else 
             Container
                 .Bind<ResourcesViewContainer>()

@@ -16,7 +16,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 2728676200560831467, guid: 8f6b00eb7731e56499b4e0a69cb4066f, type: 3}
+    - {fileID: 4112930212906727819, guid: 5d944fa36f8a269418cfa7539cc58bfd, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -47,24 +47,6 @@ MonoBehaviour:
       Data: 2|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.AnotherModalView, Assembly-CSharp
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: $v
-      Entry: 1
-      Data: AnotherModalView
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 
-    - Name: $k
-      Entry: 7
-      Data: 3|System.RuntimeType, mscorlib
-    - Name: 
-      Entry: 1
       Data: DraasGames.Core.Samples.Scripts.CreditsView, Assembly-CSharp
     - Name: 
       Entry: 8
@@ -80,7 +62,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 7
-      Data: 4|System.RuntimeType, mscorlib
+      Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
       Data: DraasGames.Core.Samples.Scripts.LoadingView, Assembly-CSharp
@@ -98,16 +80,34 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 7
-      Data: 5|System.RuntimeType, mscorlib
+      Data: 4|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.MainView, Assembly-CSharp
+      Data: DraasGames.Core.Samples.Scripts.ModalView, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 
     - Name: $v
       Entry: 1
-      Data: MainView
+      Data: ModalView
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 7
+      Data: 5|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: DraasGames.Core.Samples.Scripts.HubView, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: $v
+      Entry: 1
+      Data: HubView
     - Name: 
       Entry: 8
       Data: 
@@ -119,13 +119,13 @@ MonoBehaviour:
       Data: 6|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.ModalView, Assembly-CSharp
+      Data: DraasGames.Core.Samples.Scripts.UI.Views.SettingsModalView, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 
     - Name: $v
       Entry: 1
-      Data: ModalView
+      Data: SettingsModalView
     - Name: 
       Entry: 8
       Data: 
