@@ -1,6 +1,4 @@
-﻿using DraasGames.Core.Runtime.UI.Views.Abstract;
-
-namespace DraasGames.Core.Runtime.UI.Views
+﻿namespace DraasGames.Core.Runtime.UI.Views.Abstract
 {
     public interface IViewPathRetrieveStrategy
     {

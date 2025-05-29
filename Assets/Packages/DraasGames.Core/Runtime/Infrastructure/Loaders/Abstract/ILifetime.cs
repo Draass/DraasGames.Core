@@ -2,8 +2,10 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-public interface ILifetime : IDisposable
+namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Abstract
 {
-    CancellationToken Token { get; }
-    UniTask WaitForEnd();
+    public interface ILifetime : IDisposable
+    {
+        CancellationToken Token { get; }
+    }
 }

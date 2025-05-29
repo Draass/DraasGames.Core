@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using Cysharp.Threading.Tasks;
+using DraasGames.Core.Runtime.Infrastructure.Loaders.Abstract;
 
 namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
 {
@@ -8,11 +8,6 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
         private CancellationTokenSource _cts = new();
 
         public CancellationToken Token => _cts.Token;
-        
-        public async UniTask WaitForEnd()
-        {
-            await Token.WaitUntilCanceled();
-        }
 
         public void Dispose()
         {
