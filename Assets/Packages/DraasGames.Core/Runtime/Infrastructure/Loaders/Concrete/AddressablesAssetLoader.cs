@@ -1,6 +1,7 @@
 #if DRAASGAMES_ADDRESSABLES_MODULE
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.Infrastructure.Loaders.Abstract;
 using UnityEngine;
@@ -116,7 +117,9 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
 
         public void Dispose()
         {
-            foreach (var lt in _handles.Keys)
+            var lifetimes = _handles.Keys.ToArray();  
+            
+            foreach (var lt in lifetimes)
             {
                 lt.Dispose();
             }
