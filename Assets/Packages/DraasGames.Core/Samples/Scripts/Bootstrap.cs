@@ -29,7 +29,7 @@ namespace DraasGames.Core.Samples.Scripts
 
         private async UniTaskVoid ImitateLoading()
         {
-            _viewRouter.Show<LoadingView>();
+            await _viewRouter.ShowAsync<LoadingView>();
 
             await UniTask.Delay(TimeSpan.FromSeconds(3f));
 

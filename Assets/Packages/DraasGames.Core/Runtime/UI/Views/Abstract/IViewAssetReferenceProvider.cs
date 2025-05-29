@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.AddressableAssets;
 
-namespace DraasGames.Core.Runtime.Infrastructure.Installers
+namespace DraasGames.Core.Runtime.UI.Views.Abstract
 {
     public interface IViewAssetReferenceProvider
     {
