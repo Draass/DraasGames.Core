@@ -32,7 +32,7 @@ namespace Packages.DraasGames.Core.Editor
         [Space(10)]
         [SerializeField, ToggleLeft, LabelText("Display start game button")]
         [InfoBox("Enabling this will draw a StartGameButton in the toolbar. State might be updated after editor restart" +
-                 "in case you disabled this")]
+                 " in case you disabled this")]
         [OnValueChanged(nameof(OnStartButtonStateChanged))]
         [BoxGroup("Options")]
         private bool _startGameButtonEnabled;
