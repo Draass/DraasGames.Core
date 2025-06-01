@@ -11,24 +11,33 @@ namespace Packages.DraasGames.Core.Editor
 {
     public class DraasGamesModulesToggleWindow : OdinEditorWindow
     {
-        private const string ADDRESSABLES_MODULE_DEFINE = "DRAASGAMES_ADDRESSABLES_MODULE";
-        private const string EFFECTS_MODULE_DEFINE = "DRAASGAMES_EFFECTS_MODULE";
-    
         [MenuItem("Tools/DraasGames")]
-        private static void OpenWindow() => 
+        private static void OpenWindow()
+        {
             GetWindow<DraasGamesModulesToggleWindow>("DraasGames Modules Settings").Show();
+        }
 
         [InfoBox("Toggle your modules on/off and then click 'Apply Defines' to update scripting defines.")]
         [InfoBox("Enabling this will require DoTween in the project")]
         [SerializeField, ToggleLeft, LabelText("Enable Addressables Module")] 
+        [BoxGroup("Defines")]
         private bool _addressablesModuleEnabled;
     
         [Space(10)]
         [SerializeField, ToggleLeft, LabelText("Enable Effects Module")]
         [InfoBox("Enabling this will require DoTween in the project")]
+        [BoxGroup("Defines")]
         private bool _effectsModuleEnabled;
 
+        [Space(10)]
+        [SerializeField, ToggleLeft, LabelText("Display start game button")]
+        [InfoBox("Enabling this will require DoTween in the project")]
+        [OnValueChanged(nameof(OnStartButtonStateChanged))]
+        [BoxGroup("Additional")]
+        private bool _startGameButtonEnabled;
+        
         [Button(ButtonSizes.Large), GUIColor(0.4f, 0.8f, 0.4f)]
+        [BoxGroup("Defines")]
         public void ApplyDefines()
         {
             BuildTargetGroup targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
@@ -48,8 +57,8 @@ namespace Packages.DraasGames.Core.Editor
                 .Where(d => !string.IsNullOrEmpty(d))
                 .ToList();
 
-            HandleDefineSymbol(defineList, ADDRESSABLES_MODULE_DEFINE, _addressablesModuleEnabled);
-            HandleDefineSymbol(defineList, EFFECTS_MODULE_DEFINE, _effectsModuleEnabled);
+            HandleDefineSymbol(defineList, EditorConstants.AddressablesModuleDefine, _addressablesModuleEnabled);
+            HandleDefineSymbol(defineList, EditorConstants.EffectsModuleDefine, _effectsModuleEnabled);
 
 
             // Apply changes back
@@ -57,6 +66,11 @@ namespace Packages.DraasGames.Core.Editor
             PlayerSettings.SetScriptingDefineSymbols(namedTargetGroup, updatedDefines);
 
             Debug.Log("Scripting defines updated: " + updatedDefines);
+        }
+        
+        private void OnStartButtonStateChanged(bool state)
+        {
+            EditorPrefs.SetBool(EditorConstants.StartGameButtonPrefsKey, state);
         }
 
         private void HandleDefineSymbol(List<string> defineList, string symbol, bool shouldEnable)
@@ -74,6 +88,7 @@ namespace Packages.DraasGames.Core.Editor
         }
 
         [Button(ButtonSizes.Medium), GUIColor(0.6f, 0.6f, 1f)]
+        [BoxGroup("Defines")]
         public void RefreshFromCurrentSettings()
         {
             // Refresh toggles based on current defines

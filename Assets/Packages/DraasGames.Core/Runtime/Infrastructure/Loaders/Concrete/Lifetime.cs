@@ -11,23 +11,21 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
 
         public void Dispose()
         {
-            var cts = Interlocked.Exchange(ref _cts, null);
-
-            if (cts == null)
+            if (_cts == null)
             {
                 return;
             }
 
             try
             {
-                if (!cts.IsCancellationRequested)
+                if (!_cts.IsCancellationRequested)
                 {
-                    cts.Cancel();
+                    _cts.Cancel();
                 }
             }
             finally
             {
-                cts.Dispose();
+                _cts.Dispose();
             }
         }
     }
