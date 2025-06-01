@@ -1,11 +1,25 @@
 # Changelog
 
+## [0.3.0] - 2025-01-06
+
+### Breaking changes
+- Divided ViewInstaller into 2 distinct installers for resources and addressables flow. 
+Be aware that they are now designed to be kept on project installer. All dependencies will go to the subcontainers. 
+
+### Added
+- Added Addressables support to ViewRouter and a system for handling loading assets through Addressables 
+- Added Presenter navigation flow to remove logic from Views if desired
+- Introduced async api to view router. Sync api is now deprecated and will be removed in future
+- Added custom formatted logger
+- Added StartGame button to launch game from specified scene and return to initial one on play finished
+
+### Fixed
+- Editor settings view is now available even if there are some compilation errors
+
 ## [0.2.3] - 2025-16-05
 
 ### Fixed
-- Fixed using subsequent Show and ShowModal in ViewRouter.cs causing exception 
-
-### Fixed
+- Fixed using subsequent Show and ShowModal in ViewRouter.cs causing exception
 - Not interactable toggles are now actually not interactable
 
 ## [0.2.1] - 2025-10-01

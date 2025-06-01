@@ -9,12 +9,12 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
     public class ViewFactory : IViewFactory
     {
         private readonly IInstantiator _instantiator;
-        private readonly IViewProviderAsync _viewProviderAsync;
+        private readonly IViewProvider _viewProviderAsync;
         
         [Inject]
         public ViewFactory(
             IInstantiator instantiator, 
-            IViewProviderAsync viewProviderAsync)
+            IViewProvider viewProviderAsync)
         {
             _instantiator = instantiator;
             _viewProviderAsync = viewProviderAsync;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
@@ -9,7 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete
 {
-    public class ViewRouter : IViewRouter, IDisposable
+    public class ViewRouter : IViewRouter
     {
         public event Action<Type> OnViewShown;
         public event Action<Type> OnViewHidden;
@@ -53,57 +54,57 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         }
 
 
-        /// <summary>
-        /// Show a regular view, hiding the current one.
-        /// </summary>
-        public void Show<T>() where T : MonoBehaviour, IView
-        {
-            // POTENTIAL ISSUE: если следующая вью тяжелая, будет на время черный экран на время прогрузи
-            // Сначала надо создать, потом спрятать
-            Type currentViewType = null;
+        public void Show<T>() where T : MonoBehaviour, IView => ShowAsync<T>().Forget();
 
+        public async UniTask<T> ShowAsync<T>() where T : MonoBehaviour, IView
+        {
             HideAllModalViews();
 
-            if (_viewStack.Count > 0)
-            {
-                currentViewType = _viewStack.Peek();
-            }
-
-            CreateView<T>().Forget();
-            
+            Type? currentViewType = _viewStack.Count > 0 ? _viewStack.Peek() : null;
+            var newView = await CreateViewAsync<T>();
             _viewStack.Push(typeof(T));
 
             if (currentViewType != null)
             {
                 HideRegularView(currentViewType);
             }
+
+            OnViewShown?.Invoke(newView.GetType());
+            
+            return (T)newView;
         }
 
-        /// <summary>
-        /// Show a modal view without hiding the current one.
-        /// </summary>
-        public async void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView
+        public void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView =>
+            ShowModalAsync<T>(closeOtherModals).Forget();
+
+        public async UniTask<T> ShowModalAsync<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView
         {
             if (closeOtherModals)
+            {
                 HideAllModalViews();
+            }
 
-            var modalView = await CreateView<T>();
-
+            var modalView = await CreateViewAsync<T>();
             _modalViewStack.Push(modalView.GetType());
+            OnViewShown?.Invoke(modalView.GetType());
+
+            return (T)modalView;
         }
 
-        /// <summary>
-        /// Show a persistent view without hiding the current one. Call Hide<T> manually to hide it.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public async void ShowPersistent<T>() where T : MonoBehaviour, IView
+
+        public void ShowPersistent<T>() where T : MonoBehaviour, IView =>
+            ShowPersistentAsync<T>().Forget();
+
+        public async UniTask<T> ShowPersistentAsync<T>() where T : MonoBehaviour, IView
         {
-            var persistentView = await CreateView<T>();
-
+            var persistentView = await CreateViewAsync<T>();
             _persistentViewStack.Push(persistentView.GetType());
+            OnViewShown?.Invoke(persistentView.GetType());
+            
+            return (T)persistentView;
         }
 
-        private async UniTask<IView> CreateView<T>() where T : MonoBehaviour, IView
+        private async UniTask<IView> CreateViewAsync<T>() where T : MonoBehaviour, IView
         {
             if (_cachedViews.TryGetValue(typeof(T), out var cachedView))
             {
@@ -122,7 +123,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             return targetView;
         }
 
-        private async UniTaskVoid CreateView(Type viewType, bool modal = false)
+        private async UniTaskVoid CreateViewAsync(Type viewType, bool modal = false)
         {
             Debug.Log("Try to create: " + viewType);
 
@@ -290,6 +291,8 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         /// </summary>
         public void Return(bool closeOtherModals = true)
         {
+            // TODO to async api, do not delete current view unless previous one exists
+            
             if (closeOtherModals)
                 HideAllModalViews();
 
@@ -317,23 +320,8 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             }
             else
             {
-                CreateView(previousViewType, modal: false).Forget();
+                CreateViewAsync(previousViewType, modal: false).Forget();
             }
-        }
-
-        public void Dispose()
-        {
-            foreach (var view in _cachedViews.Values)
-            {
-                Object.Destroy((view as MonoBehaviour).gameObject);
-            }
-
-            _cachedViews.Clear();
-            _activeViews.Clear();
-
-            _viewStack.Clear();
-            _modalViewStack.Clear();
-            _persistentViewStack.Clear();
         }
 
         private void Destroy(IView view)
