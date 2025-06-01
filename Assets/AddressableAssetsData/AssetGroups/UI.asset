@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: UI
+  m_EditorClassIdentifier: 
+  m_GroupName: UI
+  m_GUID: eea6e327c339ebe42ab93bc5febc9a64
+  m_SerializeEntries:
+  - m_GUID: 0663482e9b083474d961d86865516de7
+    m_Address: Assets/Packages/DraasGames.Core/Samples/Prefabs/CreditsView.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e127a538b0ecaf43a815411dfb933e0
+    m_Address: Assets/Packages/DraasGames.Core/Samples/Prefabs/HubView.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5d944fa36f8a269418cfa7539cc58bfd
+    m_Address: Assets/Packages/DraasGames.Core/Samples/Prefabs/SettingsModalView.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f6b00eb7731e56499b4e0a69cb4066f
+    m_Address: Assets/Packages/DraasGames.Core/Samples/Prefabs/ModalView.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fc284e575aff3b147aacfde1fb2a66b9
+    m_Address: Assets/Packages/DraasGames.Core/Samples/Prefabs/LoadingView.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: aa3ef0e1c4e9ce74b8c44538aea2f385, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: d5d6dbe528bb41c41a263370d6f9e0e5, type: 2}
+    - {fileID: 11400000, guid: b222df737c778fe40b13d63ce64011bf, type: 2}

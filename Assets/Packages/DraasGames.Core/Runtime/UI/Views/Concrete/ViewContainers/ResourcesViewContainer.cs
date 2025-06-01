@@ -14,7 +14,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
         private IView _viewToAdd;
         
         [SerializeField]
-        private Dictionary<Type, string> _viewPathsPair = new Dictionary<Type, string>();
+        private Dictionary<Type, string> _viewPathsPair = new();
 
 #if UNITY_EDITOR  
         private IViewPathRetrieveStrategy _pathRetrieveStrategy = new ResourcesViewPathRetrieveStrategy();
