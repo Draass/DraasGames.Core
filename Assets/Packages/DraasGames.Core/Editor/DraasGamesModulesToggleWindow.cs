@@ -18,7 +18,7 @@ namespace Packages.DraasGames.Core.Editor
         }
 
         [InfoBox("Toggle your modules on/off and then click 'Apply Defines' to update scripting defines.")]
-        [InfoBox("Enabling this will require DoTween in the project")]
+        [InfoBox("Enabling this will require Addressables in the project")]
         [SerializeField, ToggleLeft, LabelText("Enable Addressables Module")] 
         [BoxGroup("Defines")]
         private bool _addressablesModuleEnabled;
@@ -31,11 +31,19 @@ namespace Packages.DraasGames.Core.Editor
 
         [Space(10)]
         [SerializeField, ToggleLeft, LabelText("Display start game button")]
-        [InfoBox("Enabling this will require DoTween in the project")]
+        [InfoBox("Enabling this will draw a StartGameButton in the toolbar. State might be updated after editor restart" +
+                 "in case you disabled this")]
         [OnValueChanged(nameof(OnStartButtonStateChanged))]
-        [BoxGroup("Additional")]
+        [BoxGroup("Options")]
         private bool _startGameButtonEnabled;
-        
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            
+            RefreshFromCurrentSettings();
+        }
+
         [Button(ButtonSizes.Large), GUIColor(0.4f, 0.8f, 0.4f)]
         [BoxGroup("Defines")]
         public void ApplyDefines()
@@ -59,12 +67,10 @@ namespace Packages.DraasGames.Core.Editor
 
             HandleDefineSymbol(defineList, EditorConstants.AddressablesModuleDefine, _addressablesModuleEnabled);
             HandleDefineSymbol(defineList, EditorConstants.EffectsModuleDefine, _effectsModuleEnabled);
-
-
-            // Apply changes back
+            
             string updatedDefines = string.Join(";", defineList);
             PlayerSettings.SetScriptingDefineSymbols(namedTargetGroup, updatedDefines);
-
+            
             Debug.Log("Scripting defines updated: " + updatedDefines);
         }
         
@@ -91,17 +97,16 @@ namespace Packages.DraasGames.Core.Editor
         [BoxGroup("Defines")]
         public void RefreshFromCurrentSettings()
         {
-            // Refresh toggles based on current defines
             BuildTargetGroup targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             string currentDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(targetGroup);
             var defineList = currentDefines.Split(';').Select(d => d.Trim()).ToList();
 
-            _addressablesModuleEnabled = defineList.Contains("MODULE_A");
-            _effectsModuleEnabled = defineList.Contains("MODULE_B");
-            // If you had MODULE_C:
-            // ModuleC = defineList.Contains("MODULE_C");
-
-            Debug.Log("Refreshed from current defines: " + currentDefines);
+            _addressablesModuleEnabled = defineList.Contains(EditorConstants.AddressablesModuleDefine);
+            _effectsModuleEnabled = defineList.Contains(EditorConstants.EffectsModuleDefine);
+            _startGameButtonEnabled =
+                EditorPrefs.GetBool(EditorConstants.StartGameButtonPrefsKey, false);
+            
+            // Debug.Log("Refreshed from current defines: " + currentDefines);
         }
     }
 }

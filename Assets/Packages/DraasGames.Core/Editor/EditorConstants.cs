@@ -5,7 +5,7 @@ namespace Packages.DraasGames.Core.Editor
     {
         public const string AddressablesModuleDefine = "DRAASGAMES_ADDRESSABLES_MODULE";
         public const string EffectsModuleDefine = "DRAASGAMES_EFFECTS_MODULE";
-        public static string StartGameButtonPrefsKey = "StartGameButton";
+        public const string StartGameButtonPrefsKey = "StartGameButton";
     }
 }
 
