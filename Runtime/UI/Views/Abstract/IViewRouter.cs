@@ -24,9 +24,9 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         [Obsolete("This method is obsolete and is replaced with async API. " +
                   "Consider using ShowModalAsync instead.")]
         public void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView;
-        
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>

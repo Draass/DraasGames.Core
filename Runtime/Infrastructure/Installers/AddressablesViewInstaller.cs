@@ -1,4 +1,6 @@
-﻿using DraasGames.Core.Runtime.UI.PresenterNavigationService.Concrete;
+﻿#if DRAASGAMES_ADDRESSABLES_MODULE
+using DraasGames.Core.Runtime.Infrastructure.Extensions;
+using DraasGames.Core.Runtime.UI.PresenterNavigationService.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -8,24 +10,32 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
 {
     public class AddressablesViewInstaller : MonoInstaller
     {
-        [SerializeField] private AddressablesViewContainer _viewContainer;
+        [SerializeField, Required, AssetsOnly] 
+        private AddressablesViewContainer _viewContainer;
 
+        [SerializeField]
+        [InfoBox("Installer should not be placed on ProjectContext if MoveIntoAllSubcontainers is disabled" +
+                 " or placed at scene context if MoveIntoAllSubcontainers is enabled!",
+            InfoMessageType.Error,
+            VisibleIf = nameof(ShouldShowProjectContextError))]
+        private bool _moveIntoAllSubContainers = false;
+        
         public override void InstallBindings()
         {
             Container
                 .BindInterfacesAndSelfTo<ViewFactory>()
                 .AsSingle()
-                .MoveIntoAllSubContainers();
+                .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
 
             Container
                 .BindInterfacesAndSelfTo<ViewRouter>()
                 .AsSingle()
-                .MoveIntoAllSubContainers();
+                .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
 
             Container
                 .BindInterfacesTo<PresenterNavigationService>()
                 .AsSingle()
-                .MoveIntoAllSubContainers();
+                .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
 
             BindViewRetrieval();
         }
@@ -35,13 +45,26 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             Container
                 .BindInterfacesTo<AddressablesViewProvider>()
                 .AsSingle()
-                .MoveIntoAllSubContainers();
+                .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
 
             Container
                 .BindInterfacesTo<AddressablesViewContainer>()
                 .FromInstance(_viewContainer)
                 .AsSingle()
-                .MoveIntoAllSubContainers();
+                .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
         }
+        
+#if UNITY_EDITOR
+        private bool ShouldShowProjectContextError()
+        {
+            return !IsProjectContext() && _moveIntoAllSubContainers;
+        }
+
+        private bool IsProjectContext()
+        {
+            return gameObject.name == "ProjectContext" || transform.root.name == "ProjectContext";
+        }
+#endif
     }
 }
+#endif

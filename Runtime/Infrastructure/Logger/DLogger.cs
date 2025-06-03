@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 namespace DraasGames.Core.Runtime.Infrastructure.Logger
 {
-    public class DLogger
+    public static class DLogger
     {
         private static readonly HashSet<ILoggerService> Loggers;
 
-        public void AddLogger(ILoggerService logger)
+        public static void AddLogger(ILoggerService logger)
         {
             Loggers.Add(logger);
         }
 
-        public void RemoveLogger(ILoggerService logger)
+        public static void RemoveLogger(ILoggerService logger)
         {
             Loggers.Remove(logger);
         }
 
-        public void RemoveAllLoggers()
+        public static void RemoveAllLoggers()
         {
             Loggers.Clear();
         }

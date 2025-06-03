@@ -12,7 +12,7 @@ namespace DraasGames.Core.Samples.Scripts.UI.Views
         
         private Action _onReturnToMenu;
 
-        protected override void Awake()
+        protected override void Awake() 
         {
             base.Awake();
             
