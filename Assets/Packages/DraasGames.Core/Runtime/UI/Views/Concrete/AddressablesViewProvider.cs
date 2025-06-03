@@ -12,27 +12,27 @@ using Object = UnityEngine.Object;
 
 namespace DraasGames.Core.Runtime.Infrastructure.Installers
 {
-    public class AddressablesViewProvider : IViewProvider, IDisposable
+    public class AddressablesViewProvider : IViewProvider
     {
         private readonly IAssetLoader _assetLoader;
         private readonly IViewAssetReferenceProvider _assetReferenceProvider;
-        private readonly ILifetime _lifetime;
+        private readonly IScopeLifetimeProvider _scopeLifetimeProvider;
 
         public AddressablesViewProvider(
             IAssetLoader assetLoader, 
-            IViewAssetReferenceProvider assetReferenceProvider)
+            IViewAssetReferenceProvider assetReferenceProvider,
+            IScopeLifetimeProvider scopeLifetimeProvider)
         {
             _assetLoader = assetLoader;
             _assetReferenceProvider = assetReferenceProvider;
-
-            _lifetime = new Lifetime();
+            _scopeLifetimeProvider = scopeLifetimeProvider;
         }
         
         public async UniTask<T> GetViewAsync<T>() where T : MonoBehaviour, IView
         {
             var viewReference = _assetReferenceProvider.GetAssetReference(typeof(T));
 
-            var view = await _assetLoader.LoadWithComponentAsync<T>(viewReference, _lifetime);
+            var view = await _assetLoader.LoadWithComponentAsync<T>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
             
             return view;
         }
@@ -41,14 +41,9 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         {
             var viewReference = _assetReferenceProvider.GetAssetReference(viewType);
             
-            var view = await _assetLoader.LoadAsync<Object>(viewReference, _lifetime);
+            var view = await _assetLoader.LoadAsync<Object>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
             
             return (IView) view;
-        }
-
-        public void Dispose()
-        {
-            _lifetime?.Dispose();
         }
     }
 }

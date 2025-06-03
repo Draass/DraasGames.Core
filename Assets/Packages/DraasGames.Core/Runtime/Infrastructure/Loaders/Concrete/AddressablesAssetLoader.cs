@@ -15,20 +15,20 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
     {
         private readonly Dictionary<ILifetime, List<AsyncOperationHandle>> _handles = new();
 
-        public UniTask<T> LoadAsync<T>(AssetReference assetReference, ILifetime lifetime,
+        public UniTask<T> LoadAsync<T>(AssetReference assetReference, ILifetime lifetime = null,
             Action<float> onProgress = null)
         {
             var handle = Addressables.LoadAssetAsync<T>(assetReference);
             return TrackAwaitWithProgress(lifetime, handle, onProgress);
         }
 
-        public UniTask<T> LoadAsync<T>(string key, ILifetime lifetime, Action<float> onProgress = null)
+        public UniTask<T> LoadAsync<T>(string key, ILifetime lifetime = null, Action<float> onProgress = null)
         {
             var handle = Addressables.LoadAssetAsync<T>(key);
             return TrackAwaitWithProgress(lifetime, handle, onProgress);
         }
 
-        public async UniTask<T> LoadWithComponentAsync<T>(AssetReference assetReference, ILifetime lifetime,
+        public async UniTask<T> LoadWithComponentAsync<T>(AssetReference assetReference, ILifetime lifetime = null,
             Action<float> onProgress = null) where T : Component
         {
             var go = await LoadAsync<GameObject>(assetReference, lifetime, onProgress);
@@ -41,7 +41,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
             return component;
         }
 
-        public async UniTask<T> LoadWithComponentAsync<T>(string key, ILifetime lifetime,
+        public async UniTask<T> LoadWithComponentAsync<T>(string key, ILifetime lifetime = null,
             Action<float> onProgress = null) where T : Component
         {
             var go = await LoadAsync<GameObject>(key, lifetime, onProgress);
@@ -57,6 +57,8 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
         private async UniTask<T> TrackAwaitWithProgress<T>(ILifetime lifetime, AsyncOperationHandle<T> handle,
             Action<float> onProgress)
         {
+            lifetime ??= ProjectLifetimeHolder.ProjectLifeTime;
+            
             RegisterHandle(lifetime, handle);
             
             if (onProgress != null)

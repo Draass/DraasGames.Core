@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1] - 2025-03-06
+
+### Added
+- Addressables infrastructure installer
+
+### Changed 
+- Modified installing view logic via installers
+
 ## [0.3.0] - 2025-01-06
 
 ### Breaking changes
