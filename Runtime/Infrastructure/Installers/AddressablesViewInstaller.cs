@@ -54,7 +54,6 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                 .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
         }
         
-#if UNITY_EDITOR
         private bool ShouldShowProjectContextError()
         {
             return !IsProjectContext() && _moveIntoAllSubContainers;
@@ -64,7 +63,6 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         {
             return gameObject.name == "ProjectContext" || transform.root.name == "ProjectContext";
         }
-#endif
     }
 }
 #endif
