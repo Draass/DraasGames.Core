@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.2] - 2025-04-06
+
+### Fixed
+- Build error
+
 ## [0.3.1] - 2025-03-06
 
 ### Added
