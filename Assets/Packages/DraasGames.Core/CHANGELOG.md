@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.3] - 2025-27-06
+
+### Added
+- - Add some dependencies to package.json
+
+### Changed
+- Sample is now downloadable
+
+### Fixed
+- LibraryPackageCache Addressables error
+
 ## [0.3.2] - 2025-04-06
 
 ### Fixed
