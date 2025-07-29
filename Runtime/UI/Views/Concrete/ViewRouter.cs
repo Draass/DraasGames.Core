@@ -32,33 +32,12 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         {
             _viewFactory = viewFactory;
         }
-
-        /// <summary>
-        /// Preload and cache a view without showing it.
-        /// </summary>
-        public async UniTask PreloadView<T>() where T : MonoBehaviour, IView
-        {
-            throw new NotImplementedException();
-
-            var viewType = typeof(T);
-
-            if (_cachedViews.ContainsKey(viewType))
-            {
-                Debug.LogWarning($"View {viewType} is already cached");
-                return;
-            }
-
-            var view = await _viewFactory.Create<T>();
-            _cachedViews.Add(viewType, view);
-            view.Hide(); // Ensure the view is hidden
-        }
-
-
+        
         public void Show<T>() where T : MonoBehaviour, IView => ShowAsync<T>().Forget();
 
         public async UniTask<T> ShowAsync<T>() where T : MonoBehaviour, IView
         {
-            HideAllModalViews();
+            await HideAllModalViewsAsync();
 
             Type? currentViewType = _viewStack.Count > 0 ? _viewStack.Peek() : null;
             var newView = await CreateViewAsync<T>();
@@ -81,7 +60,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         {
             if (closeOtherModals)
             {
-                HideAllModalViews();
+                await HideAllModalViewsAsync();
             }
 
             var modalView = await CreateViewAsync<T>();
@@ -103,136 +82,8 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             
             return (T)persistentView;
         }
-
-        private async UniTask<IView> CreateViewAsync<T>() where T : MonoBehaviour, IView
-        {
-            if (_cachedViews.TryGetValue(typeof(T), out var cachedView))
-            {
-                _activeViews.Add(typeof(T), cachedView);
-                cachedView.Show();
-                
-                return cachedView;
-            }
-
-            var targetView = await _viewFactory.Create<T>();
-
-            targetView.Show();
-
-            _activeViews.Add(typeof(T), targetView);
-
-            return targetView;
-        }
-
-        private async UniTask CreateViewAsync(Type viewType, bool modal = false)
-        {
-            Debug.Log("Try to create: " + viewType);
-
-            if (!_cachedViews.TryGetValue(viewType, out var targetView))
-            {
-            }
-
-            targetView = await _viewFactory.Create(viewType);
-
-            if (targetView == null)
-                throw new InvalidOperationException($"View {viewType} is not created");
-
-            targetView.Show();
-
-            if (modal)
-            {
-                _modalViewStack.Push(viewType);
-            }
-            else
-            {
-                _viewStack.Push(viewType);
-            }
-
-            _activeViews[viewType] = targetView;
-
-            OnViewShown?.Invoke(viewType);
-        }
-
-        private void HideCurrentView()
-        {
-            if (_viewStack.Count == 0)
-                return;
-
-            var currentViewType = _viewStack.Pop();
-            Debug.Log("Hiding view: " + currentViewType);
-
-            // Hide only regular views
-            if (_activeViews.TryGetValue(currentViewType, out var currentView) &&
-                !_modalViewStack.Contains(currentViewType) &&
-                !_persistentViewStack.Contains(currentViewType))
-            {
-                currentView.Hide();
-                _activeViews.Remove(currentViewType);
-                OnViewHidden?.Invoke(currentViewType);
-                // TODO Do not destroy the view if it's cached
-            }
-        }
-
-        private void HideRegularView(Type viewType)
-        {
-            // Hide only regular views
-            if (_activeViews.TryGetValue(viewType, out var currentView) &&
-                !_modalViewStack.Contains(viewType) &&
-                !_persistentViewStack.Contains(viewType))
-            {
-                currentView.Hide();
-                _activeViews.Remove(viewType);
-                OnViewHidden?.Invoke(viewType);
-
-                Destroy(currentView);
-                // TODO Do not destroy the view if it's cached
-            }
-        }
-
-        public void HideAllModalViews()
-        {
-            while (_modalViewStack.Count > 0)
-            {
-                var modalViewType = _modalViewStack.Pop();
-                if (_activeViews.TryGetValue(modalViewType, out var modalView))
-                {
-                    modalView.Hide();
-                    OnViewHidden?.Invoke(modalViewType);
-                    _activeViews.Remove(modalViewType);
-
-                    Destroy(modalView);
-                }
-            }
-        }
-
-        public async UniTask HideAllModalViewsAsync()
-        {
-            var hideTasks = new List<UniTask>();
-            var modalViewsToHide = new List<(Type viewType, IView view)>();
-
-            // Collect all modal views to hide
-            while (_modalViewStack.Count > 0)
-            {
-                var modalViewType = _modalViewStack.Pop();
-                if (_activeViews.TryGetValue(modalViewType, out var modalView))
-                {
-                    modalViewsToHide.Add((modalViewType, modalView));
-                    hideTasks.Add(modalView.HideAsync());
-                }
-            }
-
-            // Wait for all hide operations to complete
-            await UniTask.WhenAll(hideTasks);
-
-            // Clean up after all views are hidden
-            foreach (var (viewType, view) in modalViewsToHide)
-            {
-                OnViewHidden?.Invoke(viewType);
-                _activeViews.Remove(viewType);
-                Destroy(view);
-            }
-        }
-
-        public void ReturnModal()
+        
+         public void ReturnModal()
         {
             if (_modalViewStack.Count > 1)
             {
@@ -240,7 +91,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
                 if (_activeViews.TryGetValue(modalViewType, out var modalView))
                 {
-                    modalView.Hide();
+                    modalView.HideAsync().Forget();
                     OnViewHidden?.Invoke(modalViewType);
                     _activeViews.Remove(modalViewType);
                 }
@@ -268,38 +119,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         /// </summary>
         public void Hide<T>() where T : MonoBehaviour, IView
         {
-            var viewType = typeof(T);
-
-            if (!_activeViews.TryGetValue(viewType, out var view))
-            {
-                return;
-            }
-            
-            view.Hide();
-            OnViewHidden?.Invoke(viewType);
-
-            _activeViews.Remove(viewType);
-
-            // Remove from the correct stack
-            if (_modalViewStack.Contains(viewType))
-            {
-                RemoveViewFromStack(_modalViewStack, viewType);
-            }
-            else if (_viewStack.Contains(viewType))
-            {
-                RemoveViewFromStack(_viewStack, viewType);
-            }
-            else if (_persistentViewStack.Contains(viewType))
-            {
-                RemoveViewFromStack(_persistentViewStack, viewType);
-            }
-
-            //if(_cachedViews)
-
-            Destroy(view);
-
-            // todo исправить для тестов, а то ловит ошибку
-            // Do not destroy the view if it is cached
+            HideAsync<T>().Forget();
         }
 
         /// <summary>
@@ -334,22 +154,133 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             }
 
             Destroy(view);
+        }
+        
+        public void HideAllModalViews()
+        {
+            while (_modalViewStack.Count > 0)
+            {
+                var modalViewType = _modalViewStack.Pop();
+                if (_activeViews.TryGetValue(modalViewType, out var modalView))
+                {
+                    modalView.HideAsync().Forget();
+                    OnViewHidden?.Invoke(modalViewType);
+                    _activeViews.Remove(modalViewType);
 
-            // Do not destroy the view if it is cached
+                    Destroy(modalView);
+                }
+            }
         }
 
-        private void Hide(Type viewType)
+        public async UniTask HideAllModalViewsAsync()
         {
-            if (_activeViews.TryGetValue(viewType, out var view))
+            var hideTasks = new List<UniTask>();
+            var modalViewsToHide = new List<(Type viewType, IView view)>();
+
+            while (_modalViewStack.Count > 0)
             {
-                view.Hide();
+                var modalViewType = _modalViewStack.Pop();
+                if (_activeViews.TryGetValue(modalViewType, out var modalView))
+                {
+                    modalViewsToHide.Add((modalViewType, modalView));
+                    hideTasks.Add(modalView.HideAsync());
+                }
+            }
+
+            await UniTask.WhenAll(hideTasks);
+
+            foreach (var (viewType, view) in modalViewsToHide)
+            {
                 OnViewHidden?.Invoke(viewType);
                 _activeViews.Remove(viewType);
-
                 Destroy(view);
             }
         }
 
+        private async UniTask<IView> CreateViewAsync<T>() where T : MonoBehaviour, IView
+        {
+            if (_cachedViews.TryGetValue(typeof(T), out var cachedView))
+            {
+                _activeViews.Add(typeof(T), cachedView);
+                await cachedView.ShowAsync();
+                
+                return cachedView;
+            }
+
+            var targetView = await _viewFactory.Create<T>();
+
+            await targetView.ShowAsync();
+
+            _activeViews.Add(typeof(T), targetView);
+
+            return targetView;
+        }
+
+        private async UniTask CreateViewAsync(Type viewType, bool modal = false)
+        {
+            Debug.Log("Try to create: " + viewType);
+
+            if (!_cachedViews.TryGetValue(viewType, out var targetView))
+            {
+            }
+
+            targetView = await _viewFactory.Create(viewType);
+
+            if (targetView == null)
+                throw new InvalidOperationException($"View {viewType} is not created");
+
+            await targetView.ShowAsync();
+
+            if (modal)
+            {
+                _modalViewStack.Push(viewType);
+            }
+            else
+            {
+                _viewStack.Push(viewType);
+            }
+
+            _activeViews[viewType] = targetView;
+
+            OnViewShown?.Invoke(viewType);
+        }
+
+        private void HideCurrentView()
+        {
+            if (_viewStack.Count == 0)
+                return;
+
+            var currentViewType = _viewStack.Pop();
+            Debug.Log("Hiding view: " + currentViewType);
+
+            // Hide only regular views
+            if (_activeViews.TryGetValue(currentViewType, out var currentView) &&
+                !_modalViewStack.Contains(currentViewType) &&
+                !_persistentViewStack.Contains(currentViewType))
+            {
+                currentView.HideAsync().Forget();
+                _activeViews.Remove(currentViewType);
+                OnViewHidden?.Invoke(currentViewType);
+                // TODO Do not destroy the view if it's cached
+            }
+        }
+
+        private void HideRegularView(Type viewType)
+        {
+            // Hide only regular views
+            if (_activeViews.TryGetValue(viewType, out var currentView) &&
+                !_modalViewStack.Contains(viewType) &&
+                !_persistentViewStack.Contains(viewType))
+            {
+                currentView.HideAsync().Forget();
+                _activeViews.Remove(viewType);
+                OnViewHidden?.Invoke(viewType);
+
+                Destroy(currentView);
+                // TODO Do not destroy the view if it's cached
+            }
+        }
+        
         private void RemoveViewFromStack(Stack<Type> stack, Type viewType)
         {
             var tempStack = new Stack<Type>();
@@ -386,7 +317,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             var currentViewType = _viewStack.Pop();
             if (_activeViews.TryGetValue(currentViewType, out var currentView))
             {
-                currentView.Hide();
+                currentView.HideAsync().Forget();
                 OnViewHidden?.Invoke(currentViewType);
                 _activeViews.Remove(currentViewType);
             }
@@ -395,7 +326,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             var previousViewType = _viewStack.Peek();
             if (_activeViews.TryGetValue(previousViewType, out var previousView))
             {
-                previousView.Show();
+                previousView.HideAsync().Forget();
                 OnViewShown?.Invoke(previousViewType);
             }
             else
@@ -444,7 +375,9 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         private void Destroy(IView view)
         {
             if (view == null)
+            {
                 return;
+            }
 
 #if(UNITY_EDITOR)
             if (EditorApplication.isPlaying)
