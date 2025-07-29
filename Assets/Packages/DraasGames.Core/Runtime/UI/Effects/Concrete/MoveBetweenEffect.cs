@@ -1,4 +1,4 @@
-﻿#if DRAASGAMES_EFFECTS_MODULE
+﻿#if DRAASGAMES_DOTWEEN_ENABLED
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DraasGames.Core.Runtime.UI.Effects.Abstract;

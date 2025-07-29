@@ -54,20 +54,39 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         public void Hide<T>() where T : MonoBehaviour, IView;
         
         /// <summary>
+        /// Hide a specific view async.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public UniTask HideAsync<T>() where T : MonoBehaviour, IView;
+        
+        /// <summary>
         /// Hide all current viewed modal views
         /// </summary>
         public void HideAllModalViews();
         
-        // TODO add async overload
+        /// <summary>
+        /// Hide all current viewed modal views async
+        /// </summary>
+        public UniTask HideAllModalViewsAsync();
+        
         /// <summary>
         /// Return to the previous view and close all modal views by default.
         /// </summary>
         public void Return(bool closeOtherModals = true);
         
-        // TODO add async overload
+        /// <summary>
+        /// Return to the previous view and close all modal views by default async.
+        /// </summary>
+        public UniTask ReturnAsync(bool closeOtherModals = true);
+        
         /// <summary>
         /// Return to the previous modal view or close the current modal view if there is no previous modal view.
         /// </summary>
         public void ReturnModal();
+        
+        /// <summary>
+        /// Return to the previous modal view or close the current modal view if there is no previous modal view async.
+        /// </summary>
+        public UniTask ReturnModalAsync();
     }
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.5] - 2025-29-07
+
+### Added
+- HideAsync to ViewRouter
+- Auto assembly detection
+
+## [0.3.4] - 2025-22-07
+
+### Fixed
+- CustomToggleGroup behaviour
+
 ## [0.3.3] - 2025-27-06
 
 ### Added
