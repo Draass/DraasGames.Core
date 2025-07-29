@@ -326,7 +326,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             var previousViewType = _viewStack.Peek();
             if (_activeViews.TryGetValue(previousViewType, out var previousView))
             {
-                previousView.HideAsync().Forget();
+                previousView.ShowAsync().Forget();
                 OnViewShown?.Invoke(previousViewType);
             }
             else
