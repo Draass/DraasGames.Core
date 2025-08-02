@@ -37,7 +37,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             OnViewShow?.Invoke();
         }
 
-        public async UniTask ShowAsync()
+        public virtual async UniTask ShowAsync()
         {
             Show();
         }
@@ -55,7 +55,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             OnViewHide?.Invoke();
         }
 
-        public async UniTask HideAsync()
+        public virtual async UniTask HideAsync()
         {
             Hide();
         }

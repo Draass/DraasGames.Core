@@ -16,7 +16,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         /// <summary>
         /// Show a regular view async, hiding the current one.
         /// </summary>
-        public UniTask<T> ShowAsync<T>() where T : MonoBehaviour, IView;
+        public UniTask<T> ShowAsync<T>(ViewTransitionMode transitionMode = ViewTransitionMode.Sequential) where T : MonoBehaviour, IView;
         
         /// <summary>
         /// Show a modal view
