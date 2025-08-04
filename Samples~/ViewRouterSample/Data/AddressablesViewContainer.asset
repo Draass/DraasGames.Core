@@ -43,7 +43,7 @@ MonoBehaviour:
       Data: 2|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.CreditsView, Assembly-CSharp
+      Data: DraasGames.Core.Samples.Scripts.CreditsView, DraasGamesSample1
     - Name: 
       Entry: 8
       Data: 
@@ -79,7 +79,7 @@ MonoBehaviour:
       Data: 4|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.HubView, Assembly-CSharp
+      Data: DraasGames.Core.Samples.Scripts.HubView, DraasGamesSample1
     - Name: 
       Entry: 8
       Data: 
@@ -97,7 +97,7 @@ MonoBehaviour:
       Data: 5|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.LoadingView, Assembly-CSharp
+      Data: DraasGames.Core.Samples.Scripts.LoadingView, DraasGamesSample1
     - Name: 
       Entry: 8
       Data: 
@@ -133,7 +133,7 @@ MonoBehaviour:
       Data: 7|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.ModalView, Assembly-CSharp
+      Data: DraasGames.Core.Samples.Scripts.ModalView, DraasGamesSample1
     - Name: 
       Entry: 8
       Data: 
@@ -169,7 +169,7 @@ MonoBehaviour:
       Data: 9|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DraasGames.Core.Samples.Scripts.UI.Views.SettingsModalView, Assembly-CSharp
+      Data: DraasGames.Core.Samples.Scripts.UI.Views.SettingsModalView, DraasGamesSample1
     - Name: 
       Entry: 8
       Data: 

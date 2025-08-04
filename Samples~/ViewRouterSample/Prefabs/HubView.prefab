@@ -439,6 +439,8 @@ GameObject:
   - component: {fileID: 8437053438548599452}
   - component: {fileID: 3415946243094328857}
   - component: {fileID: 3556870427264268283}
+  - component: {fileID: 1798651045787347671}
+  - component: {fileID: 7191062249201812456}
   m_Layer: 5
   m_Name: HubView
   m_TagString: Untagged
@@ -543,6 +545,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _showSettingsButton: {fileID: 5409312109824709067}
+  _viewFadeEffect: {fileID: 1798651045787347671}
+--- !u!114 &1798651045787347671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7972997251101362804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82cb0d7cc22e4a83899f02da92ced94d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _canvasGroup: {fileID: 7191062249201812456}
+  _duration: 1
+--- !u!225 &7191062249201812456
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7972997251101362804}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &9027808778334866701
 GameObject:
   m_ObjectHideFlags: 0
