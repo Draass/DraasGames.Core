@@ -19,7 +19,7 @@ namespace DraasGames.Core.Samples.Scripts.Logic.Presenters
         
         public async UniTask ShowAsync()
         {
-            var view = await _viewRouter.ShowAsync<HubView>();
+            var view = await _viewRouter.ShowAsync<HubView>(ViewTransitionMode.Simultaneous);
             
             view.Initialize(OnShowSettings);
         }
