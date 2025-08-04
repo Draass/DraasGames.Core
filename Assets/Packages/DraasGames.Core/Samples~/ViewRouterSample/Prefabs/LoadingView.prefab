@@ -149,6 +149,8 @@ GameObject:
   - component: {fileID: 6214214109479937465}
   - component: {fileID: 1955881092920918221}
   - component: {fileID: 8819123322941823863}
+  - component: {fileID: 1064049627956575002}
+  - component: {fileID: 8977544245671011162}
   m_Layer: 5
   m_Name: LoadingView
   m_TagString: Untagged
@@ -252,6 +254,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa4cea38fb348e040889a1c5b13389f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _viewFadeEffect: {fileID: 8977544245671011162}
+--- !u!225 &1064049627956575002
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 358618539912774839}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &8977544245671011162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 358618539912774839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82cb0d7cc22e4a83899f02da92ced94d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _canvasGroup: {fileID: 1064049627956575002}
+  _duration: 1
 --- !u!1 &4801914316803620812
 GameObject:
   m_ObjectHideFlags: 0

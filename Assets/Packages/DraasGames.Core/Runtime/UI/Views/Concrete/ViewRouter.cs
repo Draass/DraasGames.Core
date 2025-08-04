@@ -35,22 +35,40 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         
         public void Show<T>() where T : MonoBehaviour, IView => ShowAsync<T>().Forget();
 
-        public async UniTask<T> ShowAsync<T>() where T : MonoBehaviour, IView
+        public async UniTask<T> ShowAsync<T>(ViewTransitionMode transitionMode = ViewTransitionMode.Sequential) where T : MonoBehaviour, IView
         {
             await HideAllModalViewsAsync();
 
             Type? currentViewType = _viewStack.Count > 0 ? _viewStack.Peek() : null;
-            var newView = await CreateViewAsync<T>();
-            _viewStack.Push(typeof(T));
-
-            if (currentViewType != null)
-            {
-                HideRegularView(currentViewType);
-            }
-
-            OnViewShown?.Invoke(newView.GetType());
             
-            return (T)newView;
+            if (transitionMode == ViewTransitionMode.Simultaneous && currentViewType != null)
+            {
+                // Создаем новое окно (но пока не показываем)
+                var newView = await CreateViewWithoutShowAsync<T>();
+                _viewStack.Push(typeof(T));
+                
+                // Запускаем анимации одновременно
+                var hideTask = HideRegularViewAsync(currentViewType);
+                var showTask = newView.ShowAsync();
+                
+                await UniTask.WhenAll(hideTask, showTask);
+                
+                OnViewShown?.Invoke(newView.GetType());
+                return (T)newView;
+            }
+            else
+            {
+                var newView = await CreateViewAsync<T>();
+                _viewStack.Push(typeof(T));
+
+                if (currentViewType != null)
+                {
+                    HideRegularView(currentViewType);
+                }
+
+                OnViewShown?.Invoke(newView.GetType());
+                return (T)newView;
+            }
         }
 
         public void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView =>
@@ -216,6 +234,20 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             return targetView;
         }
 
+        private async UniTask<IView> CreateViewWithoutShowAsync<T>() where T : MonoBehaviour, IView
+        {
+            if (_cachedViews.TryGetValue(typeof(T), out var cachedView))
+            {
+                _activeViews.Add(typeof(T), cachedView);
+                return cachedView;
+            }
+
+            var targetView = await _viewFactory.Create<T>();
+            _activeViews.Add(typeof(T), targetView);
+
+            return targetView;
+        }
+
         private async UniTask CreateViewAsync(Type viewType, bool modal = false)
         {
             Debug.Log("Try to create: " + viewType);
@@ -273,6 +305,22 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                 !_persistentViewStack.Contains(viewType))
             {
                 currentView.HideAsync().Forget();
+                _activeViews.Remove(viewType);
+                OnViewHidden?.Invoke(viewType);
+
+                Destroy(currentView);
+                // TODO Do not destroy the view if it's cached
+            }
+        }
+
+        private async UniTask HideRegularViewAsync(Type viewType)
+        {
+            // Hide only regular views
+            if (_activeViews.TryGetValue(viewType, out var currentView) &&
+                !_modalViewStack.Contains(viewType) &&
+                !_persistentViewStack.Contains(viewType))
+            {
+                await currentView.HideAsync();
                 _activeViews.Remove(viewType);
                 OnViewHidden?.Invoke(viewType);
 
