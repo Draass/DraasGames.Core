@@ -43,11 +43,15 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             
             if (transitionMode == ViewTransitionMode.Simultaneous && currentViewType != null)
             {
-                var hideTask = HideRegularViewAsync(currentViewType);
-                var newView = await CreateViewAsync<T>();
+                // Создаем новое окно (но пока не показываем)
+                var newView = await CreateViewWithoutShowAsync<T>();
                 _viewStack.Push(typeof(T));
                 
-                await hideTask; // Дождаться завершения скрытия
+                // Запускаем анимации одновременно
+                var hideTask = HideRegularViewAsync(currentViewType);
+                var showTask = newView.ShowAsync();
+                
+                await UniTask.WhenAll(hideTask, showTask);
                 
                 OnViewShown?.Invoke(newView.GetType());
                 return (T)newView;
@@ -225,6 +229,20 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             await targetView.ShowAsync();
 
+            _activeViews.Add(typeof(T), targetView);
+
+            return targetView;
+        }
+
+        private async UniTask<IView> CreateViewWithoutShowAsync<T>() where T : MonoBehaviour, IView
+        {
+            if (_cachedViews.TryGetValue(typeof(T), out var cachedView))
+            {
+                _activeViews.Add(typeof(T), cachedView);
+                return cachedView;
+            }
+
+            var targetView = await _viewFactory.Create<T>();
             _activeViews.Add(typeof(T), targetView);
 
             return targetView;
