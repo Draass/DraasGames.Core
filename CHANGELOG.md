@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.6] - 2025-08-10
+
+### Fixed
+- DLogger NullReferenceExpection on attemp to use any method
+- Auto register basic loggers in DLoggers
+
 ## [0.3.5] - 2025-29-07
 
 ### Added
