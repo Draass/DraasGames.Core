@@ -5,8 +5,17 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
 {
     public static class DLogger
     {
-        private static readonly HashSet<ILoggerService> Loggers;
+        private static readonly HashSet<ILoggerService> Loggers = new();
 
+        static DLogger()
+        {
+            #if UNITY_EDITOR
+            DLogger.AddLogger(new FormattedConsoleLoggerService());
+            #else
+            DLogger.AddLogger(new DefaultConsoleLoggerService());
+            #endif
+        }
+        
         public static void AddLogger(ILoggerService logger)
         {
             Loggers.Add(logger);
