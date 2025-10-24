@@ -1,3 +1,4 @@
+#if DRAASGAMES_DOTWEEN_ENABLED
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -43,3 +44,4 @@ namespace DraasGames.Core.Runtime.UI.Effects.Concrete
         }
     }
 }
+#endif

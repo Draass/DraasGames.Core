@@ -7,7 +7,7 @@ using Zenject;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders
 {
-    public class ResourcesViewProviderAsync : IViewProviderAsync
+    public class ResourcesViewProviderAsync : IViewProvider
     {
         private readonly ResourcesViewContainer _resourcesViewContainer;
         
@@ -19,14 +19,18 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders
         
         public async UniTask<T> GetViewAsync<T>() where T : MonoBehaviour, IView
         {
-            var r = await Resources.LoadAsync<GameObject>(_resourcesViewContainer.GetViewPath<T>()) as GameObject;
+            var viewPath = _resourcesViewContainer.GetViewPath<T>();
+            
+            var r = await Resources.LoadAsync<GameObject>(viewPath) as GameObject;
             
             return r.GetComponent<T>();
         }
 
         public async UniTask<IView> GetViewAsync(Type viewType)
         {
-            var r = await Resources.LoadAsync<GameObject>(_resourcesViewContainer.GetViewPath(viewType)) as MonoBehaviour;
+            var viewPath = _resourcesViewContainer.GetViewPath(viewType);
+            
+            var r = await Resources.LoadAsync<GameObject>(viewPath) as MonoBehaviour;
             
             return r as IView;
         }

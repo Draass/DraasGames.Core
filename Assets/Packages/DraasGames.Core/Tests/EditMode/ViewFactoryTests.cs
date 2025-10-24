@@ -16,7 +16,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
     public class ViewFactoryTests
     {
         private IInstantiator _mockInstantiator;
-        private IViewProviderAsync _mockViewProviderAsync;
+        private IViewProvider _mockViewProviderAsync;
 
         private ViewFactory _viewFactory;
 
@@ -24,7 +24,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
         public void Setup()
         {
             _mockInstantiator = Substitute.For<IInstantiator>();
-            _mockViewProviderAsync = Substitute.For<IViewProviderAsync>();
+            _mockViewProviderAsync = Substitute.For<IViewProvider>();
             
             _viewFactory = new ViewFactory(_mockInstantiator, _mockViewProviderAsync);
         }

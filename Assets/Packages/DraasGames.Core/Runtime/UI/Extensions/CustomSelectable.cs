@@ -12,7 +12,7 @@ namespace DraasGames.Core.Runtime.UI.Extensions
         [SerializeField, BoxGroup("Options"), OnValueChanged(nameof(OnNativeEffectsDisabled))]
         [InfoBox("If true, this UI element will mimic the default Unity Selectable (Button/Toggle) behavior.\n" +
                  "Set to false to apply custom effects for state transitions.")]
-        protected bool _isNativeEffects;
+        protected bool _isNativeEffects = true;
 
         [SerializeReference, BoxGroup("Options/Custom Effects"),
          ShowIf("@_isNativeEffects == false"), Required, Title("Normal Effect"), HideLabel]

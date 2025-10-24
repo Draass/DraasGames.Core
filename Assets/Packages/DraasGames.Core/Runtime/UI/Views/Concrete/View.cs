@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -36,6 +37,11 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             OnViewShow?.Invoke();
         }
 
+        public virtual async UniTask ShowAsync()
+        {
+            Show();
+        }
+
         [Button]
         public virtual void Hide()
         {
@@ -47,6 +53,11 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             Canvas.enabled = false;
             Raycaster.enabled = true;
             OnViewHide?.Invoke();
+        }
+
+        public virtual async UniTask HideAsync()
+        {
+            Hide();
         }
     }
 }

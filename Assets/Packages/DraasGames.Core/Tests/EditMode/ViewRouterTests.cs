@@ -376,6 +376,223 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Act & Assert
             Assert.DoesNotThrow(() => _viewRouter.Hide<MyView1>(), "Destroy should handle null references gracefully.");
         }
+
+        [Test]
+        public async Task Test_HideAsync_ShouldHideView()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("MyViewPrefab");
+            var myViewComponent = prefabGameObject.AddComponent<MyView1>();
+
+            _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(myViewComponent));
+
+            Type hiddenViewType = null;
+            _viewRouter.OnViewHidden += (type) => hiddenViewType = type;
+
+            // Act
+            await _viewRouter.ShowAsync<MyView1>();
+            await _viewRouter.HideAsync<MyView1>();
+
+            // Assert
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(MyView1)), "ActiveViews should not contain MyView after HideAsync.");
+            Assert.AreEqual(typeof(MyView1), hiddenViewType, "OnViewHidden should be triggered with MyView.");
+
+            // Clean up
+            if (prefabGameObject != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject);
+        }
+
+        [Test]
+        public async Task Test_HideAllModalViewsAsync_ShouldHideAllModals()
+        {
+            // Arrange
+            var modalGameObject1 = new GameObject("Modal1");
+            var modalGameObject2 = new GameObject("Modal2");
+            var modalViewComponent1 = modalGameObject1.AddComponent<MyModalView>();
+            var modalViewComponent2 = modalGameObject2.AddComponent<ModalView2>();
+
+            _viewFactoryMock.Create<MyModalView>().Returns(UniTask.FromResult(modalViewComponent1));
+            _viewFactoryMock.Create<ModalView2>().Returns(UniTask.FromResult(modalViewComponent2));
+
+            // Act
+            await _viewRouter.ShowModalAsync<MyModalView>(false);
+            await _viewRouter.ShowModalAsync<ModalView2>(false);
+            await _viewRouter.HideAllModalViewsAsync();
+
+            // Assert
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(MyModalView)), "ActiveViews should not contain MyModalView after HideAllModalViewsAsync.");
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(ModalView2)), "ActiveViews should not contain ModalView2 after HideAllModalViewsAsync.");
+
+            // Clean up
+            if (modalGameObject1 != null)
+                UnityEngine.Object.DestroyImmediate(modalGameObject1);
+            if (modalGameObject2 != null)
+                UnityEngine.Object.DestroyImmediate(modalGameObject2);
+        }
+
+        [Test]
+        public async Task Test_ReturnModalAsync_ShouldReturnToPreviousModal()
+        {
+            // Arrange
+            var modalGameObject1 = new GameObject("Modal1");
+            var modalGameObject2 = new GameObject("Modal2");
+            var modalViewComponent1 = modalGameObject1.AddComponent<MyModalView>();
+            var modalViewComponent2 = modalGameObject2.AddComponent<ModalView2>();
+
+            _viewFactoryMock.Create<MyModalView>().Returns(UniTask.FromResult(modalViewComponent1));
+            _viewFactoryMock.Create<ModalView2>().Returns(UniTask.FromResult(modalViewComponent2));
+
+            // Act
+            await _viewRouter.ShowModalAsync<MyModalView>();
+            await _viewRouter.ShowModalAsync<ModalView2>(false);
+            await _viewRouter.ReturnModalAsync();
+
+            // Assert
+            Assert.IsTrue(_viewRouter.ActiveViews.ContainsKey(typeof(MyModalView)), "ActiveViews should contain MyModalView after ReturnModalAsync.");
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(ModalView2)), "ActiveViews should not contain ModalView2 after ReturnModalAsync.");
+
+            // Clean up
+            if (modalGameObject1 != null)
+                UnityEngine.Object.DestroyImmediate(modalGameObject1);
+            if (modalGameObject2 != null)
+                UnityEngine.Object.DestroyImmediate(modalGameObject2);
+        }
+
+        [Test]
+        public async Task Test_ReturnAsync_ShouldReturnToPreviousView()
+        {
+            // Arrange
+            var prefabGameObject1 = new GameObject("View1");
+            var prefabGameObject2 = new GameObject("View2");
+            var viewComponent1 = prefabGameObject1.AddComponent<MyView1>();
+            var viewComponent2 = prefabGameObject2.AddComponent<View1>();
+
+            _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(viewComponent1));
+            _viewFactoryMock.Create<View1>().Returns(UniTask.FromResult(viewComponent2));
+            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(viewComponent1 as IView));
+
+            // Act
+            await _viewRouter.ShowAsync<MyView1>();
+            await _viewRouter.ShowAsync<View1>();
+            
+            // Recreate MyView as it got destroyed after showing View1
+            prefabGameObject1 = new GameObject("View1Recreated");
+            viewComponent1 = prefabGameObject1.AddComponent<MyView1>();
+            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(viewComponent1 as IView));
+            
+            await _viewRouter.ReturnAsync();
+
+            // Assert
+            Assert.IsTrue(_viewRouter.ActiveViews.ContainsKey(typeof(MyView1)), "ActiveViews should contain MyView1 after ReturnAsync.");
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(View1)), "ActiveViews should not contain View1 after ReturnAsync.");
+
+            // Clean up
+            if (prefabGameObject1 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject1);
+            if (prefabGameObject2 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject2);
+        }
+
+        [Test]
+        public async Task Test_ShowAsync_SequentialMode_ShouldWorkAsDefault()
+        {
+            // Arrange
+            var prefabGameObject1 = new GameObject("View1");
+            var prefabGameObject2 = new GameObject("View2");
+            var viewComponent1 = prefabGameObject1.AddComponent<MyView1>();
+            var viewComponent2 = prefabGameObject2.AddComponent<View1>();
+
+            _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(viewComponent1));
+            _viewFactoryMock.Create<View1>().Returns(UniTask.FromResult(viewComponent2));
+
+            // Act
+            await _viewRouter.ShowAsync<MyView1>(ViewTransitionMode.Sequential);
+            await _viewRouter.ShowAsync<View1>(ViewTransitionMode.Sequential);
+
+            // Assert
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(MyView1)), "ActiveViews should not contain MyView1 after sequential transition.");
+            Assert.IsTrue(_viewRouter.ActiveViews.ContainsKey(typeof(View1)), "ActiveViews should contain View1 after sequential transition.");
+
+            // Clean up
+            if (prefabGameObject1 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject1);
+            if (prefabGameObject2 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject2);
+        }
+
+        [Test]
+        public async Task Test_ShowAsync_SimultaneousMode_ShouldHideAndShowSimultaneously()
+        {
+            // Arrange
+            var prefabGameObject1 = new GameObject("View1");
+            var prefabGameObject2 = new GameObject("View2");
+            var viewComponent1 = prefabGameObject1.AddComponent<MyView1>();
+            var viewComponent2 = prefabGameObject2.AddComponent<View1>();
+
+            _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(viewComponent1));
+            _viewFactoryMock.Create<View1>().Returns(UniTask.FromResult(viewComponent2));
+
+            // Act
+            await _viewRouter.ShowAsync<MyView1>();
+            await _viewRouter.ShowAsync<View1>(ViewTransitionMode.Simultaneous);
+
+            // Assert
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(MyView1)), "ActiveViews should not contain MyView1 after simultaneous transition.");
+            Assert.IsTrue(_viewRouter.ActiveViews.ContainsKey(typeof(View1)), "ActiveViews should contain View1 after simultaneous transition.");
+
+            // Clean up
+            if (prefabGameObject1 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject1);
+            if (prefabGameObject2 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject2);
+        }
+
+        [Test]
+        public async Task Test_ShowAsync_DefaultParameter_ShouldUseSequentialMode()
+        {
+            // Arrange
+            var prefabGameObject1 = new GameObject("View1");
+            var prefabGameObject2 = new GameObject("View2");
+            var viewComponent1 = prefabGameObject1.AddComponent<MyView1>();
+            var viewComponent2 = prefabGameObject2.AddComponent<View1>();
+
+            _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(viewComponent1));
+            _viewFactoryMock.Create<View1>().Returns(UniTask.FromResult(viewComponent2));
+
+            // Act - не указываем параметр, должен использоваться Sequential по умолчанию
+            await _viewRouter.ShowAsync<MyView1>();
+            await _viewRouter.ShowAsync<View1>();
+
+            // Assert
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(MyView1)), "ActiveViews should not contain MyView1 with default mode.");
+            Assert.IsTrue(_viewRouter.ActiveViews.ContainsKey(typeof(View1)), "ActiveViews should contain View1 with default mode.");
+
+            // Clean up
+            if (prefabGameObject1 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject1);
+            if (prefabGameObject2 != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject2);
+        }
+
+        [Test]
+        public async Task Test_ShowAsync_SimultaneousMode_WithNoCurrentView_ShouldWork()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("View1");
+            var viewComponent = prefabGameObject.AddComponent<MyView1>();
+
+            _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(viewComponent));
+
+            // Act - показываем первое окно с Simultaneous режимом (не должно быть ошибок)
+            await _viewRouter.ShowAsync<MyView1>(ViewTransitionMode.Simultaneous);
+
+            // Assert
+            Assert.IsTrue(_viewRouter.ActiveViews.ContainsKey(typeof(MyView1)), "ActiveViews should contain MyView1 when shown first with simultaneous mode.");
+
+            // Clean up
+            if (prefabGameObject != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject);
+        }
     }
 
     public class MyModalView : View
