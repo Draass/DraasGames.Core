@@ -9,11 +9,11 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
 
         static DLogger()
         {
-            #if UNITY_EDITOR
-            DLogger.AddLogger(new FormattedConsoleLoggerService());
-            #else
-            DLogger.AddLogger(new DefaultConsoleLoggerService());
-            #endif
+#if UNITY_EDITOR
+            Loggers.Add(new FormattedConsoleLoggerService());
+#elif UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE
+            Loggers.Add(new DefaultConsoleLoggerService());
+#endif
         }
         
         public static void AddLogger(ILoggerService logger)
