@@ -40,10 +40,16 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         public async UniTask<IView> GetViewAsync(Type viewType)
         {
             var viewReference = _assetReferenceProvider.GetAssetReference(viewType);
-            
-            var view = await _assetLoader.LoadAsync<Object>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
-            
-            return (IView) view;
+
+            var go = await _assetLoader.LoadAsync<GameObject>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
+
+            var component = go.GetComponent(viewType) as IView;
+            if (component == null)
+            {
+                throw new NullReferenceException($"Can't get {viewType.Name} from {go.name}");
+            }
+
+            return component;
         }
     }
 }
