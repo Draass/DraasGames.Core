@@ -33,14 +33,15 @@ ViewRouter is used for handling view switching. It is designed with 3 types of v
 
 ### How to use
 1. Create a ViewContainer from context menu (DraasGames/UI/...) and add there views you would like to have.
-2. Create you View scripts. You can use base View class or create your own. It should implement IView and inherit MonoBehaviour to be used.
+2. Create you View scripts. You can use base View class or create your own. It should implement IView or IView<TParam> (for parameterized views) and inherit MonoBehaviour to be used.
 3. Add your view script to view prefab.
 4. Use ResourcesViewInstaller or AddressablesViewInstaller. It will inject everything necessary to subcontainers.
 5. Inject IVIewRouter and you are done.
 
 ### API
 ``` csharp
-IViewRouter.ShowAsync<T>(IView view);
+IViewRouter.ShowAsync<T>();
+IViewRouter.ShowAsync<T, TParam>(TParam param);
 ```
 
 ## PresenterNavigationService

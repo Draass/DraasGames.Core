@@ -8,8 +8,8 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
     [Obsolete]
     public abstract class ViewContainer : SerializedScriptableObject
     {
-        public abstract string GetViewPath<T>() where T : MonoBehaviour, IView;
+        public abstract string GetViewPath<T>() where T : MonoBehaviour, IViewBase;
         public abstract string GetViewPath(Type viewType);
-        public abstract void AddView(IView view);
+        public abstract void AddView(IViewBase view);
     }
 }

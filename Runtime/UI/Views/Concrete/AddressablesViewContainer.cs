@@ -190,7 +190,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                 return;
             }
 
-            var component = assetGo.GetComponent<View>();
+            var component = assetGo.GetComponent<ViewBase>();
             if (component == null)
             {
                 return;
@@ -213,7 +213,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                 var assetGo = view.editorAsset as GameObject;
                 if (assetGo == null) continue;
 
-                var component = assetGo.GetComponent<View>();
+                var component = assetGo.GetComponent<ViewBase>();
                 if (component == null) continue;
 
                 var type = component.GetType();
@@ -288,7 +288,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             var hintRect = new Rect(rect.x, rect.y + 34, rect.width, 16);
 
             GUI.Label(titleRect, "Drop Prefabs Here", titleStyle);
-            GUI.Label(hintRect, "Only prefabs with View component will be queued", hintStyle);
+            GUI.Label(hintRect, "Only prefabs with ViewBase component will be queued", hintStyle);
 
             // Drag handling
             if (isDragging)
@@ -390,7 +390,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         {
             type = null;
             if (assetGo == null) return false;
-            var component = assetGo.GetComponent<View>();
+            var component = assetGo.GetComponent<ViewBase>();
             if (component == null) return false;
             type = component.GetType();
             return true;

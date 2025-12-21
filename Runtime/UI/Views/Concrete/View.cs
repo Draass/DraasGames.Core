@@ -10,54 +10,86 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
     [DisallowMultipleComponent]
-    public class View : MonoBehaviour, IView
+    public abstract class ViewBase : MonoBehaviour, IViewBase
     {
-        protected Canvas Canvas { get; set; }
-        protected GraphicRaycaster Raycaster { get; set; }
+        protected Canvas Canvas { get; private set; }
+        protected GraphicRaycaster Raycaster { get; private set; }
 
         public event Action OnViewShow;
         public event Action OnViewHide;
 
         protected virtual void Awake()
         {
-            Canvas = GetComponent<Canvas>();
-            Raycaster = GetComponent<GraphicRaycaster>();
+            CacheComponents();
         }
 
-        [Button]
-        public virtual void Show()
+        protected void CacheComponents()
+        {
+            if (Canvas == null)
+            {
+                Canvas = GetComponent<Canvas>();
+            }
+
+            if (Raycaster == null)
+            {
+                Raycaster = GetComponent<GraphicRaycaster>();
+            }
+        }
+
+        protected void ShowInternal()
         {
 #if UNITY_EDITOR
-            Canvas = GetComponent<Canvas>();
-            Raycaster = GetComponent<GraphicRaycaster>();
+            CacheComponents();
 #endif
-            
             Raycaster.enabled = true;
             Canvas.enabled = true;
             OnViewShow?.Invoke();
         }
 
-        public virtual async UniTask ShowAsync()
-        {
-            Show();
-        }
-
-        [Button]
-        public virtual void Hide()
+        protected void HideInternal()
         {
 #if UNITY_EDITOR
-            Canvas = GetComponent<Canvas>();
-            Raycaster = GetComponent<GraphicRaycaster>();
+            CacheComponents();
 #endif
-            
             Canvas.enabled = false;
             Raycaster.enabled = true;
             OnViewHide?.Invoke();
         }
 
-        public virtual async UniTask HideAsync()
+        public virtual UniTask HideAsync()
         {
-            Hide();
+            HideInternal();
+            return UniTask.CompletedTask;
+        }
+    }
+
+    public class View : ViewBase, IView
+    {
+        [Button]
+        public virtual void Show()
+        {
+            ShowInternal();
+        }
+
+        public virtual UniTask ShowAsync()
+        {
+            ShowInternal();
+            return UniTask.CompletedTask;
+        }
+
+        [Button]
+        public virtual void Hide()
+        {
+            HideInternal();
+        }
+    }
+
+    public class View<TParam> : ViewBase, IView<TParam>
+    {
+        public virtual UniTask ShowAsync(TParam param)
+        {
+            ShowInternal();
+            return UniTask.CompletedTask;
         }
     }
 }
