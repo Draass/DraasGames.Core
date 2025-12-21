@@ -15,9 +15,7 @@ namespace DraasGames.Core.Samples.Scripts.Logic.Presenters
         
         public async UniTask ShowAsync(string message)
         {
-            var view = await _viewRouter.ShowModalAsync<CustomMessageView>();
-            
-            view.Initialize(message);
+            await _viewRouter.ShowModalAsync<CustomMessageView, string>(message);
         }
     }
 }

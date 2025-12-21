@@ -11,44 +11,44 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
     public class ResourcesViewContainer : SerializedScriptableObject
     {
         [SerializeField, BoxGroup("Add View")]
-        private IView _viewToAdd;
-        
+        private IViewBase _viewToAdd;
+
         [SerializeField]
         private Dictionary<Type, string> _viewPathsPair = new();
 
-#if UNITY_EDITOR  
+#if UNITY_EDITOR
         private IViewPathRetrieveStrategy _pathRetrieveStrategy = new ResourcesViewPathRetrieveStrategy();
 #endif
-        
+
         public string GetViewPath<T>()
         {
             return _viewPathsPair[typeof(T)];
         }
-        
+
         public string GetViewPath(Type viewType)
         {
             if (!viewType.IsAssignableFrom(typeof(MonoBehaviour)))
                 throw new ArgumentException($"Type {viewType} is not a MonoBehaviour");
-            
-            if(!viewType.IsAssignableFrom(typeof(IView)))
-                throw new ArgumentException($"Type {viewType} is not an IView");
-            
+
+            if (!viewType.IsAssignableFrom(typeof(IViewBase)))
+                throw new ArgumentException($"Type {viewType} is not an IViewBase");
+
             return _viewPathsPair[viewType];
         }
-        
-#if UNITY_EDITOR  
+
+#if UNITY_EDITOR
         [Button, BoxGroup("Add View")]
         private void EditorAddView()
         {
             AddView(_viewToAdd);
         }
-        
-        public void AddView(IView view)
+
+        public void AddView(IViewBase view)
         {
             Type derivedType = view.GetType();
-            
+
             var path = _pathRetrieveStrategy.RetrieveViewPath(view);
-            
+
             if (_viewPathsPair.TryGetValue(derivedType, out var viewPath))
             {
                 _viewPathsPair[derivedType] = path;

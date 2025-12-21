@@ -8,12 +8,11 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders
 {
     public class ResourcesViewPathRetrieveStrategy : IViewPathRetrieveStrategy
     {
-        public string RetrieveViewPath(IView view)
+        public string RetrieveViewPath(IViewBase view)
         {
             var path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(view as MonoBehaviour);
-                
-            int index = path.IndexOf("Resources", StringComparison.Ordinal);
 
+            int index = path.IndexOf("Resources", StringComparison.Ordinal);
             if (index >= 0)
             {
                 // Remove everything before "Resources" and ".prefab" at the end

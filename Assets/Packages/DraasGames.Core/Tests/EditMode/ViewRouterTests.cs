@@ -272,7 +272,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             
             // Mock the factory to return the real MyView component
             _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(myViewComponent));
-            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IView));
+            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IViewBase));
             
             // Act
             _viewRouter.Show<MyView1>();
@@ -299,7 +299,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             
             // Mock the factory to return the real MyView component
             _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(myViewComponent));
-            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IView));
+            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IViewBase));
             _viewFactoryMock.Create<MyModalView>().Returns(UniTask.FromResult(modalViewComponent));
             
             // Act
@@ -330,7 +330,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Recreate MyView as it got destroyed after showing MyModalView
             prefabGameObject = new GameObject("MyViewPrefab");
             myViewComponent = prefabGameObject.AddComponent<MyView1>();
-            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IView));
+            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IViewBase));
             
             _viewRouter.Return();
             
@@ -469,7 +469,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
 
             _viewFactoryMock.Create<MyView1>().Returns(UniTask.FromResult(viewComponent1));
             _viewFactoryMock.Create<View1>().Returns(UniTask.FromResult(viewComponent2));
-            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(viewComponent1 as IView));
+            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(viewComponent1 as IViewBase));
 
             // Act
             await _viewRouter.ShowAsync<MyView1>();
@@ -478,7 +478,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Recreate MyView as it got destroyed after showing View1
             prefabGameObject1 = new GameObject("View1Recreated");
             viewComponent1 = prefabGameObject1.AddComponent<MyView1>();
-            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(viewComponent1 as IView));
+            _viewFactoryMock.Create(typeof(MyView1)).Returns(UniTask.FromResult(viewComponent1 as IViewBase));
             
             await _viewRouter.ReturnAsync();
 
@@ -593,6 +593,135 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             if (prefabGameObject != null)
                 UnityEngine.Object.DestroyImmediate(prefabGameObject);
         }
+
+        [Test]
+        public async Task Test_ShowAsync_WithParam_ShouldPassParam()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("ParamStringView");
+            var viewComponent = prefabGameObject.AddComponent<ParamStringView>();
+            _viewFactoryMock.Create<ParamStringView>().Returns(UniTask.FromResult(viewComponent));
+
+            const string expectedParam = "test-param";
+
+            // Act
+            await _viewRouter.ShowAsync<ParamStringView, string>(expectedParam);
+
+            // Assert
+            Assert.AreEqual(expectedParam, viewComponent.LastParam);
+
+            // Clean up
+            if (prefabGameObject != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject);
+        }
+
+        [Test]
+        public async Task Test_ShowModalAsync_WithParam_ShouldPassParam()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("ParamModalView");
+            var viewComponent = prefabGameObject.AddComponent<ParamModalView>();
+            _viewFactoryMock.Create<ParamModalView>().Returns(UniTask.FromResult(viewComponent));
+
+            const string expectedParam = "modal-param";
+
+            // Act
+            await _viewRouter.ShowModalAsync<ParamModalView, string>(expectedParam);
+
+            // Assert
+            Assert.AreEqual(expectedParam, viewComponent.LastParam);
+
+            // Clean up
+            if (prefabGameObject != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject);
+        }
+
+        [Test]
+        public async Task Test_ShowPersistentAsync_WithParam_ShouldPassParam()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("ParamPersistentView");
+            var viewComponent = prefabGameObject.AddComponent<ParamPersistentView>();
+            _viewFactoryMock.Create<ParamPersistentView>().Returns(UniTask.FromResult(viewComponent));
+
+            const string expectedParam = "persistent-param";
+
+            // Act
+            await _viewRouter.ShowPersistentAsync<ParamPersistentView, string>(expectedParam);
+
+            // Assert
+            Assert.AreEqual(expectedParam, viewComponent.LastParam);
+
+            // Clean up
+            if (prefabGameObject != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject);
+        }
+
+        [Test]
+        public async Task Test_ReturnAsync_ShouldReplayParamViewParam()
+        {
+            // Arrange
+            var firstParamGameObject = new GameObject("ParamStringView-First");
+            var firstParamView = firstParamGameObject.AddComponent<ParamStringView>();
+            var secondParamGameObject = new GameObject("ParamStringView-Second");
+            var secondParamView = secondParamGameObject.AddComponent<ParamStringView>();
+            var viewGameObject = new GameObject("View1");
+            var viewComponent = viewGameObject.AddComponent<View1>();
+
+            _viewFactoryMock.Create<ParamStringView>().Returns(UniTask.FromResult(firstParamView));
+            _viewFactoryMock.Create(typeof(ParamStringView))
+                .Returns(UniTask.FromResult(secondParamView as IViewBase));
+            _viewFactoryMock.Create<View1>().Returns(UniTask.FromResult(viewComponent));
+
+            const string expectedParam = "return-param";
+
+            // Act
+            await _viewRouter.ShowAsync<ParamStringView, string>(expectedParam);
+            await _viewRouter.ShowAsync<View1>();
+            await _viewRouter.ReturnAsync();
+
+            // Assert
+            Assert.AreEqual(expectedParam, secondParamView.LastParam);
+            Assert.IsTrue(_viewRouter.ActiveViews.ContainsKey(typeof(ParamStringView)),
+                "ActiveViews should contain ParamStringView after ReturnAsync.");
+
+            // Clean up
+            if (firstParamGameObject != null)
+                UnityEngine.Object.DestroyImmediate(firstParamGameObject);
+            if (secondParamGameObject != null)
+                UnityEngine.Object.DestroyImmediate(secondParamGameObject);
+            if (viewGameObject != null)
+                UnityEngine.Object.DestroyImmediate(viewGameObject);
+        }
+
+        [Test]
+        public async Task Test_ShowAsync_SimultaneousMode_WithParam_ShouldHideAndShow()
+        {
+            // Arrange
+            var currentGameObject = new GameObject("HideTrackView");
+            var currentView = currentGameObject.AddComponent<HideTrackView>();
+            var nextGameObject = new GameObject("ParamIntView");
+            var nextView = nextGameObject.AddComponent<ParamIntView>();
+
+            _viewFactoryMock.Create<HideTrackView>().Returns(UniTask.FromResult(currentView));
+            _viewFactoryMock.Create<ParamIntView>().Returns(UniTask.FromResult(nextView));
+
+            const int expectedParam = 42;
+
+            // Act
+            await _viewRouter.ShowAsync<HideTrackView>();
+            await _viewRouter.ShowAsync<ParamIntView, int>(expectedParam, ViewTransitionMode.Simultaneous);
+
+            // Assert
+            Assert.IsTrue(currentView.HideCalled, "HideAsync should be called for the previous view.");
+            Assert.AreEqual(expectedParam, nextView.LastParam);
+
+            // Clean up
+            if (currentGameObject != null)
+                UnityEngine.Object.DestroyImmediate(currentGameObject);
+            if (nextGameObject != null)
+                UnityEngine.Object.DestroyImmediate(nextGameObject);
+        }
     }
 
     public class MyModalView : View
@@ -609,5 +738,60 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
         
     public class View2 : View
     {
+    }
+
+    public class ParamStringView : View<string>
+    {
+        public string LastParam { get; private set; }
+
+        public override UniTask ShowAsync(string param)
+        {
+            LastParam = param;
+            return base.ShowAsync(param);
+        }
+    }
+
+    public class ParamModalView : View<string>
+    {
+        public string LastParam { get; private set; }
+
+        public override UniTask ShowAsync(string param)
+        {
+            LastParam = param;
+            return base.ShowAsync(param);
+        }
+    }
+
+    public class ParamPersistentView : View<string>
+    {
+        public string LastParam { get; private set; }
+
+        public override UniTask ShowAsync(string param)
+        {
+            LastParam = param;
+            return base.ShowAsync(param);
+        }
+    }
+
+    public class ParamIntView : View<int>
+    {
+        public int LastParam { get; private set; }
+
+        public override UniTask ShowAsync(int param)
+        {
+            LastParam = param;
+            return base.ShowAsync(param);
+        }
+    }
+
+    public class HideTrackView : View
+    {
+        public bool HideCalled { get; private set; }
+
+        public override UniTask HideAsync()
+        {
+            HideCalled = true;
+            return base.HideAsync();
+        }
     }
 }

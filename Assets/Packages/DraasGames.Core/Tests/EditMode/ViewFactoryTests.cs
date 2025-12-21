@@ -51,8 +51,8 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Arrange
             var prefabGameObject = new GameObject("MyViewPrefab");
             var myViewComponent = prefabGameObject.AddComponent<MyView1>();
-            _mockViewProviderAsync.GetViewAsync(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IView));
-            _mockInstantiator.InstantiatePrefabForComponent<IView>(myViewComponent).Returns(myViewComponent);
+            _mockViewProviderAsync.GetViewAsync(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IViewBase));
+            _mockInstantiator.InstantiatePrefabForComponent<IViewBase>(myViewComponent).Returns(myViewComponent);
 
             // Act
             var result =  await _viewFactory.Create(typeof(MyView1)) as MyView1;
@@ -67,8 +67,8 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Arrange
             var prefabGameObject = new GameObject("MyViewPrefab");
             var myViewComponent = prefabGameObject.AddComponent<MyView1>();
-            _mockViewProviderAsync.GetViewAsync(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IView));
-            _mockInstantiator.InstantiatePrefabForComponent<IView>(myViewComponent).Returns(myViewComponent);
+            _mockViewProviderAsync.GetViewAsync(typeof(MyView1)).Returns(UniTask.FromResult(myViewComponent as IViewBase));
+            _mockInstantiator.InstantiatePrefabForComponent<IViewBase>(myViewComponent).Returns(myViewComponent);
 
             try
             {

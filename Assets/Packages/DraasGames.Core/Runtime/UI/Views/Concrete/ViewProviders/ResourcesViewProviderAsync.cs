@@ -10,29 +10,29 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders
     public class ResourcesViewProviderAsync : IViewProvider
     {
         private readonly ResourcesViewContainer _resourcesViewContainer;
-        
+
         [Inject]
         public ResourcesViewProviderAsync(ResourcesViewContainer resourcesViewContainer)
         {
             _resourcesViewContainer = resourcesViewContainer;
         }
-        
-        public async UniTask<T> GetViewAsync<T>() where T : MonoBehaviour, IView
+
+        public async UniTask<T> GetViewAsync<T>() where T : MonoBehaviour, IViewBase
         {
             var viewPath = _resourcesViewContainer.GetViewPath<T>();
-            
+
             var r = await Resources.LoadAsync<GameObject>(viewPath) as GameObject;
-            
+
             return r.GetComponent<T>();
         }
 
-        public async UniTask<IView> GetViewAsync(Type viewType)
+        public async UniTask<IViewBase> GetViewAsync(Type viewType)
         {
             var viewPath = _resourcesViewContainer.GetViewPath(viewType);
-            
+
             var r = await Resources.LoadAsync<GameObject>(viewPath) as MonoBehaviour;
-            
-            return r as IView;
+
+            return r as IViewBase;
         }
     }
 }

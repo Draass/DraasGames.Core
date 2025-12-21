@@ -2,6 +2,6 @@
 {
     public interface IViewPathRetrieveStrategy
     {
-        public string RetrieveViewPath(IView view);
+        string RetrieveViewPath(IViewBase view);
     }
 }

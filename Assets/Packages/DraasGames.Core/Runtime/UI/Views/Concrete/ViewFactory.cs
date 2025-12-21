@@ -10,33 +10,33 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
     {
         private readonly IInstantiator _instantiator;
         private readonly IViewProvider _viewProviderAsync;
-        
+
         [Inject]
         public ViewFactory(
-            IInstantiator instantiator, 
+            IInstantiator instantiator,
             IViewProvider viewProviderAsync)
         {
             _instantiator = instantiator;
             _viewProviderAsync = viewProviderAsync;
         }
-        
-        public async UniTask<IView> Create(Type viewType)
+
+        public async UniTask<IViewBase> Create(Type viewType)
         {
-            if(!typeof(IView).IsAssignableFrom(viewType))
-                throw new ArgumentException($"Type {viewType} is not an IView");
-            
-            if(!typeof(MonoBehaviour).IsAssignableFrom(viewType))
+            if (!typeof(IViewBase).IsAssignableFrom(viewType))
+                throw new ArgumentException($"Type {viewType} is not an IViewBase");
+
+            if (!typeof(MonoBehaviour).IsAssignableFrom(viewType))
                 throw new ArgumentException($"Type {viewType} is not a MonoBehaviour");
-            
+
             var viewPrefab = await _viewProviderAsync.GetViewAsync(viewType) as MonoBehaviour;
 
-            return _instantiator.InstantiatePrefabForComponent<IView>(viewPrefab);
+            return _instantiator.InstantiatePrefabForComponent<IViewBase>(viewPrefab);
         }
 
-        public async UniTask<T> Create<T>() where T : MonoBehaviour, IView
+        public async UniTask<T> Create<T>() where T : MonoBehaviour, IViewBase
         {
             var viewPrefab = await _viewProviderAsync.GetViewAsync<T>() as MonoBehaviour;
-            
+
             return _instantiator.InstantiatePrefabForComponent<T>(viewPrefab);
         }
     }
