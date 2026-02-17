@@ -19,7 +19,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         [Serializable]
         public class ViewEntry
         {
-            [OdinSerialize, LabelText("View Type"), VerticalGroup("Split/Left"), PropertyOrder(0)]
+            [OdinSerialize, LabelText("View Type"), HorizontalGroup("Split"), VerticalGroup("Split/Left"), PropertyOrder(0)]
             public Type ViewType;
 
             [OdinSerialize, LabelText("Prefab"), VerticalGroup("Split/Right"), PropertyOrder(1)]
