@@ -7,6 +7,8 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
     {
         private static readonly HashSet<ILoggerService> Loggers = new();
 
+        public static DLogLevel MinimumLevel { get; set; } = DLogLevel.Info;
+
         static DLogger()
         {
 #if UNITY_EDITOR
@@ -33,6 +35,11 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
         
         public static void Log(string message, object sender = null)
         {
+            if (!ShouldLog(DLogLevel.Info))
+            {
+                return;
+            }
+
             foreach (var logger in Loggers)
             {
                 logger.Log(message, sender);
@@ -41,6 +48,11 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
         
         public static void LogWarning(string message, object sender = null)
         {
+            if (!ShouldLog(DLogLevel.Warning))
+            {
+                return;
+            }
+
             foreach (var logger in Loggers)
             {
                 logger.LogWarning(message, sender);
@@ -49,6 +61,11 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
         
         public static void LogError(string message, object sender = null)
         {
+            if (!ShouldLog(DLogLevel.Error))
+            {
+                return;
+            }
+
             foreach (var logger in Loggers)
             {
                 logger.LogError(message, sender);
@@ -57,10 +74,25 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
         
         public static void LogException(Exception exception)
         {
+            if (!ShouldLog(DLogLevel.Exception))
+            {
+                return;
+            }
+
             foreach (var logger in Loggers)
             {
                 logger.LogException(exception);
             }
+        }
+
+        private static bool ShouldLog(DLogLevel messageLevel)
+        {
+            if (MinimumLevel == DLogLevel.None)
+            {
+                return false;
+            }
+
+            return messageLevel >= MinimumLevel;
         }
     }
 }

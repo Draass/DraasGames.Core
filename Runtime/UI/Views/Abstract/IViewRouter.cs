@@ -6,6 +6,10 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
 {
     public interface IViewRouter
     {
+        event Action<Type> OnViewShown;
+        
+        event Action<Type> OnViewHidden;
+        
         /// <summary>
         /// Show a regular view, hiding the current one.
         /// </summary>

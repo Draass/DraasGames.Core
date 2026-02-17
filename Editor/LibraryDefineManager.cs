@@ -48,7 +48,7 @@ namespace Packages.DraasGames.Core.Editor
                         }
                         catch { }
                     }
-                
+
                     RemoveDefineSymbol(define);
                 }
             }
