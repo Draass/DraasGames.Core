@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.7] - 2025-09-12
+
+### Fixed
+- ObjectDispodesException in ProjectLifetimeHolder when reload domain turned off
+
 ## [0.3.6] - 2025-08-10
 
 ### Fixed
