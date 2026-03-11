@@ -6,8 +6,22 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
     public static class DLogger
     {
         private static readonly HashSet<ILoggerService> Loggers = new();
+        private static DLogLevel _minimumLevel = DLogLevel.Info;
+        private static bool _minimumLevelInitialized;
 
-        public static DLogLevel MinimumLevel { get; set; } = DLogLevel.Info;
+        public static DLogLevel MinimumLevel
+        {
+            get
+            {
+                EnsureMinimumLevelInitialized();
+                return _minimumLevel;
+            }
+            set
+            {
+                _minimumLevel = value;
+                _minimumLevelInitialized = true;
+            }
+        }
 
         static DLogger()
         {
@@ -17,7 +31,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
             Loggers.Add(new DefaultConsoleLoggerService());
 #endif
         }
-        
+
         public static void AddLogger(ILoggerService logger)
         {
             Loggers.Add(logger);
@@ -32,7 +46,13 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
         {
             Loggers.Clear();
         }
-        
+
+        public static void ReloadSettings()
+        {
+            _minimumLevel = ResolveConfiguredMinimumLevel();
+            _minimumLevelInitialized = true;
+        }
+
         public static void Log(string message, object sender = null)
         {
             if (!ShouldLog(DLogLevel.Info))
@@ -45,7 +65,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                 logger.Log(message, sender);
             }
         }
-        
+
         public static void LogWarning(string message, object sender = null)
         {
             if (!ShouldLog(DLogLevel.Warning))
@@ -58,7 +78,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                 logger.LogWarning(message, sender);
             }
         }
-        
+
         public static void LogError(string message, object sender = null)
         {
             if (!ShouldLog(DLogLevel.Error))
@@ -71,7 +91,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                 logger.LogError(message, sender);
             }
         }
-        
+
         public static void LogException(Exception exception)
         {
             if (!ShouldLog(DLogLevel.Exception))
@@ -93,6 +113,22 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
             }
 
             return messageLevel >= MinimumLevel;
+        }
+
+        private static void EnsureMinimumLevelInitialized()
+        {
+            if (_minimumLevelInitialized)
+            {
+                return;
+            }
+
+            ReloadSettings();
+        }
+
+        private static DLogLevel ResolveConfiguredMinimumLevel()
+        {
+            var settings = UnityEngine.Resources.Load<DLoggerSettings>(DLoggerSettings.ResourcePath);
+            return settings != null ? settings.MinimumLevel : DLogLevel.Info;
         }
     }
 }
