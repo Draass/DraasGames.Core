@@ -1,3 +1,9 @@
 {
-	"name": "NewAssembly"
+    "name": "NewAssembly",
+    "references": [
+        "DraasGames.Core"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
 }
