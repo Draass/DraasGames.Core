@@ -1,4 +1,6 @@
-﻿using DraasGames.Core.Runtime.Infrastructure.Extensions;
+using CoreInstantiator = DraasGames.Core.Runtime.Infrastructure.Core.IInstantiator;
+using DraasGames.Core.Runtime.Infrastructure.Core;
+using DraasGames.Core.Runtime.Infrastructure.Extensions;
 using DraasGames.Core.Runtime.UI.PresenterNavigationService.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers;
@@ -11,7 +13,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
 {
     public class ResourcesViewInstaller : MonoInstaller
     {
-        [SerializeField, Required, AssetsOnly] 
+        [SerializeField, Required, AssetsOnly]
         private ResourcesViewContainer _resourcesViewContainer;
 
         [SerializeField]
@@ -20,15 +22,21 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             InfoMessageType.Error,
             VisibleIf = nameof(ShouldShowProjectContextError))]
         private bool _moveIntoAllSubContainers = false;
-        
+
         public override void InstallBindings()
         {
+            Container
+                .Bind<CoreInstantiator>()
+                .To<ZenjectInstantiatorAdapter>()
+                .AsSingle()
+                .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
+
             Container
                 .BindInterfacesAndSelfTo<ViewFactory>()
                 .FromNew()
                 .AsSingle()
                 .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
-            
+
             Container
                 .BindInterfacesAndSelfTo<ViewRouter>()
                 .AsSingle()
@@ -38,7 +46,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                 .BindInterfacesTo<PresenterNavigationService>()
                 .AsSingle()
                 .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
-            
+
             BindViewRetrieval();
         }
 
@@ -49,14 +57,14 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                 .FromInstance(_resourcesViewContainer)
                 .AsSingle()
                 .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
-                
+
             Container
                 .BindInterfacesTo<ResourcesViewProviderAsync>()
                 .FromNew()
                 .AsSingle()
                 .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
         }
-        
+
         // TODO to general validation method
         private bool ShouldShowProjectContextError()
         {

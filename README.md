@@ -14,7 +14,8 @@ This is a set of scripts that I commonly use in my projects.
 - [License](#license)
 
 # Dependencies
-- Extenject
+- Extenject (optional, for `DraasGames.Core.Zenject` integration)
+- Reflex (optional, for `DraasGames.Core.Reflex` integration)
 - OdinInspector
 - UniTask
 - DOTween
@@ -35,8 +36,15 @@ ViewRouter is used for handling view switching. It is designed with 3 types of v
 1. Create a ViewContainer from context menu (DraasGames/UI/...) and add there views you would like to have.
 2. Create you View scripts. You can use base View class or create your own. It should implement IView or IView<TParam> (for parameterized views) and inherit MonoBehaviour to be used.
 3. Add your view script to view prefab.
-4. Use ResourcesViewInstaller or AddressablesViewInstaller. It will inject everything necessary to subcontainers.
-5. Inject IVIewRouter and you are done.
+4. Choose the installer that matches your DI container:
+- `ResourcesViewInstaller` or `AddressablesViewInstaller` for Extenject/Zenject
+- `ResourcesViewInstallerReflex` or `AddressablesViewInstallerReflex` for Reflex
+5. For Reflex, place installer on the corresponding `ProjectScope` or `SceneScope` depending on the lifetime you want.
+6. Inject IVIewRouter and you are done.
+
+### Optional DI Integrations
+- Reflex integration is enabled automatically when `com.gustavopsantos.reflex` is installed.
+- Zenject integration is compiled only when `DRAASGAMES_ZENJECT_ENABLED` scripting define is present, because Zenject is commonly installed as an asset/plugin rather than a UPM package.
 
 ### API
 ``` csharp

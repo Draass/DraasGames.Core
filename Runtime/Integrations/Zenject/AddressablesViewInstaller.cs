@@ -1,4 +1,6 @@
-﻿#if DRAASGAMES_ADDRESSABLES_ENABLED
+#if DRAASGAMES_ADDRESSABLES_ENABLED
+using CoreInstantiator = DraasGames.Core.Runtime.Infrastructure.Core.IInstantiator;
+using DraasGames.Core.Runtime.Infrastructure.Core;
 using DraasGames.Core.Runtime.Infrastructure.Extensions;
 using DraasGames.Core.Runtime.UI.PresenterNavigationService.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete;
@@ -10,7 +12,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
 {
     public class AddressablesViewInstaller : MonoInstaller
     {
-        [SerializeField, Required, AssetsOnly] 
+        [SerializeField, Required, AssetsOnly]
         private AddressablesViewContainer _viewContainer;
 
         [SerializeField]
@@ -19,9 +21,15 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             InfoMessageType.Error,
             VisibleIf = nameof(ShouldShowProjectContextError))]
         private bool _moveIntoAllSubContainers = false;
-        
+
         public override void InstallBindings()
         {
+            Container
+                .Bind<CoreInstantiator>()
+                .To<ZenjectInstantiatorAdapter>()
+                .AsSingle()
+                .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
+
             Container
                 .BindInterfacesAndSelfTo<ViewFactory>()
                 .AsSingle()
@@ -53,7 +61,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                 .AsSingle()
                 .MoveIntoAllSubContainersConditional(_moveIntoAllSubContainers);
         }
-        
+
         private bool ShouldShowProjectContextError()
         {
             return !IsProjectContext() && _moveIntoAllSubContainers;

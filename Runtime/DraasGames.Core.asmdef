@@ -3,7 +3,6 @@
     "rootNamespace": "",
     "references": [
         "DOTween.Modules",
-        "Zenject",
         "Sirenix.OdinInspector.Modules.Unity.Addressables",
         "UniTask",
         "UnityEngine.UI",

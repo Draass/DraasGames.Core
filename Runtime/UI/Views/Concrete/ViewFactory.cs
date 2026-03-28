@@ -2,7 +2,7 @@
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using UnityEngine;
-using Zenject;
+using DraasGames.Core.Runtime.Infrastructure.Core;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete
 {
@@ -11,7 +11,6 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         private readonly IInstantiator _instantiator;
         private readonly IViewProvider _viewProviderAsync;
 
-        [Inject]
         public ViewFactory(
             IInstantiator instantiator,
             IViewProvider viewProviderAsync)

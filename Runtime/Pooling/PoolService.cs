@@ -5,7 +5,7 @@ using DraasGames.Core.Runtime.Infrastructure.Loaders.Abstract;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Pool;
-using Zenject;
+using DraasGames.Core.Runtime.Infrastructure.Core;
 using Object = UnityEngine.Object;
 
 namespace DraasGames.Core.Runtime.Pooling
