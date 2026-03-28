@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers;
 using UnityEngine;
-using Zenject;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders
 {
@@ -11,7 +10,6 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders
     {
         private readonly ResourcesViewContainer _resourcesViewContainer;
 
-        [Inject]
         public ResourcesViewProviderAsync(ResourcesViewContainer resourcesViewContainer)
         {
             _resourcesViewContainer = resourcesViewContainer;

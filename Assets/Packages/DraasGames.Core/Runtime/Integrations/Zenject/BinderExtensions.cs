@@ -1,4 +1,4 @@
-﻿using Zenject;
+using Zenject;
 
 namespace DraasGames.Core.Runtime.Infrastructure.Extensions
 {
@@ -11,7 +11,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Extensions
             {
                 binder.MoveIntoAllSubContainers();
             }
-            
+
             return binder;
         }
     }

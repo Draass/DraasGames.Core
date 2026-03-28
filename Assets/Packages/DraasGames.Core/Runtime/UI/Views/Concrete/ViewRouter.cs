@@ -5,7 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using UnityEngine;
-using Zenject;
 using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR

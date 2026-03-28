@@ -1,0 +1,26 @@
+{
+    "name": "DraasGames.Core.Reflex",
+    "rootNamespace": "",
+    "references": [
+        "DraasGames.Core",
+        "Sirenix.OdinInspector.Modules.Unity.Addressables",
+        "Reflex"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "DRAASGAMES_REFLEX_ENABLED"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.gustavopsantos.reflex",
+            "expression": "0.0.0",
+            "define": "DRAASGAMES_REFLEX_ENABLED"
+        }
+    ],
+    "noEngineReferences": false
+}

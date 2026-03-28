@@ -8,7 +8,7 @@ using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
+using DraasGames.Core.Runtime.Infrastructure.Core;
 
 namespace _Project.Scripts.DraasGames.Tests.EditMode
 {

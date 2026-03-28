@@ -1,14 +1,10 @@
 {
-    "name": "DraasGames.Core",
+    "name": "DraasGames.Core.Zenject",
     "rootNamespace": "",
     "references": [
-        "DOTween.Modules",
-        "Sirenix.OdinInspector.Modules.Unity.Addressables",
-        "UniTask",
-        "UnityEngine.UI",
-        "Unity.Addressables",
-        "Unity.TextMeshPro",
-        "Unity.ResourceManager"
+        "DraasGames.Core",
+        "Zenject",
+        "Sirenix.OdinInspector.Modules.Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -16,7 +12,9 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "DRAASGAMES_ZENJECT_ENABLED"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

@@ -1,4 +1,4 @@
-﻿#if DRAASGAMES_ADDRESSABLES_ENABLED
+#if DRAASGAMES_ADDRESSABLES_ENABLED
 using DraasGames.Core.Runtime.Infrastructure.Extensions;
 using DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete;
 using Sirenix.OdinInspector;
