@@ -1,0 +1,25 @@
+{
+    "name": "DraasGames.Core.VContainer",
+    "rootNamespace": "",
+    "references": [
+        "DraasGames.Core",
+        "VContainer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "DRAASGAMES_VCONTAINER_ENABLED"
+    ],
+    "versionDefines": [
+        {
+            "name": "jp.hadashikick.vcontainer",
+            "expression": "1.17.0",
+            "define": "DRAASGAMES_VCONTAINER_ENABLED"
+        }
+    ],
+    "noEngineReferences": false
+}
