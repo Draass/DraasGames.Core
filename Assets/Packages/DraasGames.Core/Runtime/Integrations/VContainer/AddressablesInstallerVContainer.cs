@@ -10,7 +10,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
     public class AddressablesInstallerVContainer : LifetimeScope
     {
         [SerializeField]
-        private VContainerLifetime _lifetime = VContainerLifetime.Singleton;
+        private VContainerLifetime _lifetime = VContainerLifetime.Scoped;
 
         protected override void Configure(IContainerBuilder builder)
         {
