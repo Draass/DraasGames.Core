@@ -19,6 +19,7 @@ namespace DraasGames.Core.Runtime.UI.Extensions
 
         private enum ToggleMode
         {
+            None,
             ToggleSingle,
             ToggleBetween
         }
@@ -113,6 +114,8 @@ namespace DraasGames.Core.Runtime.UI.Extensions
         {
             switch (_toggleMode)
             {
+                case ToggleMode.None:
+                    break;
                 case ToggleMode.ToggleSingle:
                     ToggleSingeOnEffect();
                     break;
