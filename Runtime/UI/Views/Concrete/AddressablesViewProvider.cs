@@ -28,11 +28,16 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             _scopeLifetimeProvider = scopeLifetimeProvider;
         }
 
-        public async UniTask<T> GetViewAsync<T>() where T : MonoBehaviour, IViewBase
+        public async UniTask<T> GetViewAsync<T>() where T : IViewBase
         {
             var viewReference = _assetReferenceProvider.GetAssetReference(typeof(T));
 
-            var view = await _assetLoader.LoadWithComponentAsync<T>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
+            var go = await _assetLoader.LoadAsync<GameObject>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
+            var component = go.GetComponent(typeof(T)) as IViewBase;
+            if (component is not T view)
+            {
+                throw new NullReferenceException($"Can't get {typeof(T).Name} from {go.name}");
+            }
 
             return view;
         }

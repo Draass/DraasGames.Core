@@ -11,6 +11,16 @@ namespace DraasGames.Core.Runtime.UI.Views.Abstract
         UniTask HideAsync();
     }
 
+    public interface ICacheableView : IViewBase
+    {
+        UniTask ResetStateAsync();
+    }
+
+    public interface IDestroyableView : IViewBase
+    {
+        void DestroyView();
+    }
+
     public interface IView : IViewBase
     {
         UniTask ShowAsync();

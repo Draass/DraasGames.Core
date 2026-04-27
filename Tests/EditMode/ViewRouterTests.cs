@@ -350,7 +350,73 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Act
             _viewRouter.Show<MyView1>();
             _viewRouter.Hide<MyView1>();
-            
+
+            Assert.IsTrue(prefabGameObject == null);
+        }
+
+        [Test]
+        public async Task Test_Hide_Cacheable_ShouldCacheView()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("CacheableViewPrefab");
+            var viewComponent = prefabGameObject.AddComponent<CacheableTestView>();
+
+            _viewFactoryMock.Create<CacheableTestView>().Returns(UniTask.FromResult(viewComponent));
+
+            // Act
+            await _viewRouter.ShowAsync<CacheableTestView>();
+            await _viewRouter.HideAsync<CacheableTestView>();
+
+            // Assert
+            Assert.IsFalse(prefabGameObject == null, "Cacheable view should not be destroyed on hide.");
+            Assert.IsFalse(_viewRouter.ActiveViews.ContainsKey(typeof(CacheableTestView)));
+            Assert.IsTrue(_viewRouter.IsCached<CacheableTestView>());
+
+            // Clean up
+            _viewRouter.ReleaseCached<CacheableTestView>();
+        }
+
+        [Test]
+        public async Task Test_Show_CachedView_ShouldReuseAndResetView()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("CacheableViewPrefab");
+            var viewComponent = prefabGameObject.AddComponent<CacheableTestView>();
+
+            _viewFactoryMock.Create<CacheableTestView>().Returns(UniTask.FromResult(viewComponent));
+
+            // Act
+            var firstShow = await _viewRouter.ShowAsync<CacheableTestView>();
+            await _viewRouter.HideAsync<CacheableTestView>();
+            var secondShow = await _viewRouter.ShowAsync<CacheableTestView>();
+
+            // Assert
+            Assert.AreSame(firstShow, secondShow);
+            Assert.AreEqual(1, viewComponent.ResetStateCallCount);
+            await _viewFactoryMock.Received(1).Create<CacheableTestView>();
+
+            // Clean up
+            if (prefabGameObject != null)
+                UnityEngine.Object.DestroyImmediate(prefabGameObject);
+        }
+
+        [Test]
+        public async Task Test_ReleaseCached_ShouldDestroyCachedView()
+        {
+            // Arrange
+            var prefabGameObject = new GameObject("CacheableViewPrefab");
+            var viewComponent = prefabGameObject.AddComponent<CacheableTestView>();
+
+            _viewFactoryMock.Create<CacheableTestView>().Returns(UniTask.FromResult(viewComponent));
+
+            // Act
+            await _viewRouter.ShowAsync<CacheableTestView>();
+            await _viewRouter.HideAsync<CacheableTestView>();
+            var released = _viewRouter.ReleaseCached<CacheableTestView>();
+
+            // Assert
+            Assert.IsTrue(released);
+            Assert.IsFalse(_viewRouter.IsCached<CacheableTestView>());
             Assert.IsTrue(prefabGameObject == null);
         }
 
@@ -792,6 +858,17 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
         {
             HideCalled = true;
             return base.HideAsync();
+        }
+    }
+
+    public class CacheableTestView : View, ICacheableView
+    {
+        public int ResetStateCallCount { get; private set; }
+
+        public UniTask ResetStateAsync()
+        {
+            ResetStateCallCount++;
+            return UniTask.CompletedTask;
         }
     }
 }

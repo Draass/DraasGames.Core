@@ -16,12 +16,11 @@ namespace DraasGames.Core.Runtime.UI.Extensions
             None,
             Custom
         }
-
         private enum ToggleMode
         {
-            None,
-            ToggleSingle,
-            ToggleBetween
+            None = 0,
+            ToggleSingle = 1,
+            ToggleBetween = 2
         }
         
         public event Action<bool> OnValueChanged;
