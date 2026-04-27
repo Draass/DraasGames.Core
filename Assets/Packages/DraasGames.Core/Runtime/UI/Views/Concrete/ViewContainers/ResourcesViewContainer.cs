@@ -20,17 +20,17 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
         private IViewPathRetrieveStrategy _pathRetrieveStrategy = new ResourcesViewPathRetrieveStrategy();
 #endif
 
-        public string GetViewPath<T>()
+        public string GetViewPath<T>() where T : IViewBase
         {
             return _viewPathsPair[typeof(T)];
         }
 
         public string GetViewPath(Type viewType)
         {
-            if (!viewType.IsAssignableFrom(typeof(MonoBehaviour)))
+            if (!typeof(MonoBehaviour).IsAssignableFrom(viewType))
                 throw new ArgumentException($"Type {viewType} is not a MonoBehaviour");
 
-            if (!viewType.IsAssignableFrom(typeof(IViewBase)))
+            if (!typeof(IViewBase).IsAssignableFrom(viewType))
                 throw new ArgumentException($"Type {viewType} is not an IViewBase");
 
             return _viewPathsPair[viewType];

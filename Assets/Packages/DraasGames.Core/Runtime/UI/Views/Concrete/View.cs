@@ -4,13 +4,18 @@ using DraasGames.Core.Runtime.UI.Views.Abstract;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete
 {
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
     [DisallowMultipleComponent]
-    public abstract class ViewBase : MonoBehaviour, IViewBase
+    public abstract class ViewBase : MonoBehaviour, IViewBase, IDestroyableView
     {
         protected Canvas Canvas { get; private set; }
         protected GraphicRaycaster Raycaster { get; private set; }
@@ -52,7 +57,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             CacheComponents();
 #endif
             Canvas.enabled = false;
-            Raycaster.enabled = true;
+            Raycaster.enabled = false;
             OnViewHide?.Invoke();
         }
 
@@ -60,6 +65,22 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         {
             HideInternal();
             return UniTask.CompletedTask;
+        }
+
+        public virtual void DestroyView()
+        {
+#if UNITY_EDITOR
+            if (EditorApplication.isPlaying)
+            {
+                Object.Destroy(gameObject);
+            }
+            else
+            {
+                Object.DestroyImmediate(gameObject);
+            }
+#else
+            Object.Destroy(gameObject);
+#endif
         }
     }
 

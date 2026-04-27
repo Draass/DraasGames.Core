@@ -5,11 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using UnityEngine;
-using Object = UnityEngine.Object;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete
 {
@@ -52,18 +47,66 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             }
         }
         
-        public event Action<Type> OnViewShown;
+        public event Action<Type>? OnViewShown;
         
-        public event Action<Type> OnViewHidden;
+        public event Action<Type>? OnViewHidden;
 
         public IReadOnlyDictionary<Type, IViewBase> CachedViews => _cachedViews;
         
         public IReadOnlyDictionary<Type, IViewBase> ActiveViews => _activeViews;
+
+        public bool IsCached<T>() where T : IViewBase
+        {
+            return _cachedViews.ContainsKey(typeof(T));
+        }
+
+        public async UniTask PreloadAsync<T>() where T : IViewBase
+        {
+            using (await EnterTransitionLockAsync())
+            {
+                var viewType = typeof(T);
+                if (_activeViews.ContainsKey(viewType) || _cachedViews.ContainsKey(viewType))
+                {
+                    return;
+                }
+
+                var view = await _viewFactory.Create<T>();
+                if (view == null)
+                {
+                    throw new InvalidOperationException($"View {viewType} is not created");
+                }
+
+                if (view is not ICacheableView cacheableView)
+                {
+                    Destroy(view);
+                    throw new InvalidOperationException(
+                        $"View {viewType} must implement {nameof(ICacheableView)} to be preloaded.");
+                }
+
+                await view.HideAsync();
+                await cacheableView.ResetStateAsync();
+                _cachedViews[viewType] = view;
+            }
+        }
+
+        public bool ReleaseCached<T>() where T : IViewBase
+        {
+            return ReleaseCached(typeof(T));
+        }
+
+        public void ReleaseAllCached()
+        {
+            var cachedViewTypes = new List<Type>(_cachedViews.Keys);
+            foreach (var viewType in cachedViewTypes)
+            {
+                ReleaseCached(viewType);
+            }
+        }
         
-        public void Show<T>() where T : MonoBehaviour, IView => ShowAsync<T>().Forget();
+        public void Show<T>() where T : IView => ShowAsync<T>().Forget();
 
         public async UniTask<T> ShowAsync<T>(ViewTransitionMode transitionMode = ViewTransitionMode.Sequential) 
-            where T : MonoBehaviour, IView
+            where T : IView
         {
             using (await EnterTransitionLockAsync())
             {
@@ -101,7 +144,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
                 if (currentEntry != null)
                 {
-                    HideRegularView(currentEntry.ViewType);
+                    await HideRegularViewAsync(currentEntry.ViewType);
                 }
 
                 OnViewShown?.Invoke(createdView.GetType());
@@ -110,7 +153,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         }
 
         public async UniTask<T> ShowAsync<T, TParam>(TParam param, ViewTransitionMode transitionMode = ViewTransitionMode.Sequential)
-            where T : MonoBehaviour, IView<TParam>
+            where T : IView<TParam>
         {
             using (await EnterTransitionLockAsync())
             {
@@ -150,7 +193,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
                 if (currentEntry != null)
                 {
-                    HideRegularView(currentEntry.ViewType);
+                    await HideRegularViewAsync(currentEntry.ViewType);
                 }
 
                 OnViewShown?.Invoke(createdView.GetType());
@@ -158,11 +201,11 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             }
         }
 
-        public void ShowModal<T>(bool closeOtherModals = true) where T : MonoBehaviour, IView =>
+        public void ShowModal<T>(bool closeOtherModals = true) where T : IView =>
             ShowModalAsync<T>(closeOtherModals).Forget();
 
         public async UniTask<T> ShowModalAsync<T>(bool closeOtherModals = true) 
-            where T : MonoBehaviour, IView
+            where T : IView
         {
             using (await EnterTransitionLockAsync())
             {
@@ -186,7 +229,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         }
 
         public async UniTask<T> ShowModalAsync<T, TParam>(TParam param, bool closeOtherModals = true)
-            where T : MonoBehaviour, IView<TParam>
+            where T : IView<TParam>
         {
             using (await EnterTransitionLockAsync())
             {
@@ -210,11 +253,11 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         }
 
 
-        public void ShowPersistent<T>() where T : MonoBehaviour, IView =>
+        public void ShowPersistent<T>() where T : IView =>
             ShowPersistentAsync<T>().Forget();
 
         public async UniTask<T> ShowPersistentAsync<T>() 
-            where T : MonoBehaviour, IView
+            where T : IView
         {
             using (await EnterTransitionLockAsync())
             {
@@ -233,7 +276,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         }
 
         public async UniTask<T> ShowPersistentAsync<T, TParam>(TParam param) 
-            where T : MonoBehaviour, IView<TParam>
+            where T : IView<TParam>
         {
             using (await EnterTransitionLockAsync())
             {
@@ -266,10 +309,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
                     if (_activeViews.TryGetValue(modalViewType, out var modalView))
                     {
-                        await modalView.HideAsync();
-                        OnViewHidden?.Invoke(modalViewType);
-                        _activeViews.Remove(modalViewType);
-                        Destroy(modalView);
+                        await HideAndReleaseViewAsync(modalViewType, modalView);
                     }
                 }
             }
@@ -279,7 +319,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         /// Hide a specific view.
         /// </summary>
         public void Hide<T>() 
-            where T : MonoBehaviour, IViewBase
+            where T : IViewBase
         {
             HideAsync<T>().Forget();
         }
@@ -288,7 +328,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
         /// Hide a specific view async.
         /// </summary>
         public async UniTask HideAsync<T>() 
-            where T : MonoBehaviour, IViewBase
+            where T : IViewBase
         {
             using (await EnterTransitionLockAsync())
             {
@@ -299,11 +339,6 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                     return;
                 }
                 
-                await view.HideAsync();
-                OnViewHidden?.Invoke(viewType);
-
-                _activeViews.Remove(viewType);
-
                 // Remove from the correct stack
                 if (_modalViewStack.Contains(viewType))
                 {
@@ -318,7 +353,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                     RemoveViewFromStack(_persistentViewStack, viewType);
                 }
 
-                Destroy(view);
+                await HideAndReleaseViewAsync(viewType, view);
             }
         }
         
@@ -354,14 +389,12 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             foreach (var (viewType, view) in modalViewsToHide)
             {
-                OnViewHidden?.Invoke(viewType);
-                _activeViews.Remove(viewType);
-                Destroy(view);
+                ReleaseHiddenView(viewType, view);
             }
         }
 
         private async UniTask<IViewBase> CreateViewAsync<T>() 
-            where T : MonoBehaviour, IView
+            where T : IView
         {
             var viewType = typeof(T);
             if (_activeViews.TryGetValue(viewType, out var alreadyActive))
@@ -371,19 +404,24 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             if (_cachedViews.TryGetValue(viewType, out var cachedView))
             {
+                _cachedViews.Remove(viewType);
+                await ResetCachedViewAsync(cachedView);
                 _activeViews[viewType] = cachedView;
                 await ((IView)cachedView).ShowAsync();
                 return cachedView;
             }
 
             var targetView = await _viewFactory.Create<T>();
+            if (targetView == null)
+                throw new InvalidOperationException($"View {viewType} is not created");
+
             _activeViews[viewType] = targetView;
             await targetView.ShowAsync();
             return targetView;
         }
 
         private async UniTask<IViewBase> CreateViewAsync<T, TParam>(TParam param) 
-            where T : MonoBehaviour, IView<TParam>
+            where T : IView<TParam>
         {
             var viewType = typeof(T);
             if (_activeViews.TryGetValue(viewType, out var alreadyActive))
@@ -393,19 +431,24 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             if (_cachedViews.TryGetValue(viewType, out var cachedView))
             {
+                _cachedViews.Remove(viewType);
+                await ResetCachedViewAsync(cachedView);
                 _activeViews[viewType] = cachedView;
                 await ((IView<TParam>)cachedView).ShowAsync(param);
                 return cachedView;
             }
 
             var targetView = await _viewFactory.Create<T>();
+            if (targetView == null)
+                throw new InvalidOperationException($"View {viewType} is not created");
+
             _activeViews[viewType] = targetView;
             await targetView.ShowAsync(param);
             return targetView;
         }
 
         private async UniTask<IViewBase> CreateViewWithoutShowAsync<T>() 
-            where T : MonoBehaviour, IViewBase
+            where T : IViewBase
         {
             var viewType = typeof(T);
             if (_activeViews.TryGetValue(viewType, out var alreadyActive))
@@ -415,11 +458,16 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             if (_cachedViews.TryGetValue(viewType, out var cachedView))
             {
+                _cachedViews.Remove(viewType);
+                await ResetCachedViewAsync(cachedView);
                 _activeViews[viewType] = cachedView;
                 return cachedView;
             }
 
             var targetView = await _viewFactory.Create<T>();
+            if (targetView == null)
+                throw new InvalidOperationException($"View {viewType} is not created");
+
             _activeViews[viewType] = targetView;
             return targetView;
         }
@@ -435,6 +483,8 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
 
             if (_cachedViews.TryGetValue(entry.ViewType, out var cachedView))
             {
+                _cachedViews.Remove(entry.ViewType);
+                await ResetCachedViewAsync(cachedView);
                 _activeViews[entry.ViewType] = cachedView;
                 await entry.ShowRequest.ShowAsync(cachedView);
                 OnViewShown?.Invoke(entry.ViewType);
@@ -467,10 +517,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                 !_modalViewStack.Contains(currentViewType) &&
                 !_persistentViewStack.Contains(currentViewType))
             {
-                currentView.HideAsync().Forget();
-                _activeViews.Remove(currentEntry.ViewType);
-                OnViewHidden?.Invoke(currentEntry.ViewType);
-                // TODO Do not destroy the view if it's cached
+                HideAndReleaseViewAsync(currentEntry.ViewType, currentView).Forget();
             }
         }
 
@@ -481,29 +528,19 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                 !_modalViewStack.Contains(viewType) &&
                 !_persistentViewStack.Contains(viewType))
             {
-                _activeViews.Remove(viewType);
-                OnViewHidden?.Invoke(viewType);
-
-                HideAndDestroyViewAsync(currentView).Forget();
-                // TODO Do not destroy the view if it's cached
+                HideAndReleaseViewAsync(viewType, currentView).Forget();
             }
         }
 
-        private async UniTask HideAndDestroyViewAsync(IViewBase view)
+        private async UniTask HideAndReleaseViewAsync(Type viewType, IViewBase view)
         {
             if (view == null)
             {
                 return;
             }
 
-            try
-            {
-                await view.HideAsync();
-            }
-            finally
-            {
-                Destroy(view);
-            }
+            await view.HideAsync();
+            ReleaseHiddenView(viewType, view);
         }
 
         private async UniTask HideRegularViewAsync(Type viewType)
@@ -513,12 +550,29 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                 !_modalViewStack.Contains(viewType) &&
                 !_persistentViewStack.Contains(viewType))
             {
-                await currentView.HideAsync();
-                _activeViews.Remove(viewType);
-                OnViewHidden?.Invoke(viewType);
+                await HideAndReleaseViewAsync(viewType, currentView);
+            }
+        }
 
-                Destroy(currentView);
-                // TODO Do not destroy the view if it's cached
+        private void ReleaseHiddenView(Type viewType, IViewBase view)
+        {
+            _activeViews.Remove(viewType);
+            OnViewHidden?.Invoke(viewType);
+
+            if (view is ICacheableView)
+            {
+                _cachedViews[viewType] = view;
+                return;
+            }
+
+            Destroy(view);
+        }
+
+        private async UniTask ResetCachedViewAsync(IViewBase view)
+        {
+            if (view is ICacheableView cacheableView)
+            {
+                await cacheableView.ResetStateAsync();
             }
         }
 
@@ -599,10 +653,7 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
                 var currentEntry = _viewStack.Pop();
                 if (_activeViews.TryGetValue(currentEntry.ViewType, out var currentView))
                 {
-                    await currentView.HideAsync();
-                    OnViewHidden?.Invoke(currentEntry.ViewType);
-                    _activeViews.Remove(currentEntry.ViewType);
-                    Destroy(currentView);
+                    await HideAndReleaseViewAsync(currentEntry.ViewType, currentView);
                 }
 
                 // Show previous view
@@ -619,26 +670,36 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             }
         }
 
+        private bool ReleaseCached(Type viewType)
+        {
+            if (_activeViews.ContainsKey(viewType))
+            {
+                return false;
+            }
+
+            if (!_cachedViews.Remove(viewType, out var cachedView))
+            {
+                return false;
+            }
+
+            Destroy(cachedView);
+            return true;
+        }
+
         private void Destroy(IViewBase view)
         {
-            var mb = view as MonoBehaviour;
-            if (mb == null)
+            if (view == null)
             {
                 return;
             }
 
-#if(UNITY_EDITOR)
-            if (EditorApplication.isPlaying)
+            if (view is not IDestroyableView destroyableView)
             {
-                Object.Destroy(mb.gameObject);
+                throw new InvalidOperationException(
+                    $"View {view.GetType()} does not implement {nameof(IDestroyableView)}.");
             }
-            else
-            {
-                Object.DestroyImmediate(mb.gameObject);
-            }
-#else
-            GameObject.Destroy(mb.gameObject);
-#endif
+
+            destroyableView.DestroyView();
         }
     }
     

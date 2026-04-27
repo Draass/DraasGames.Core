@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using Sirenix.OdinInspector;
-using UnityEngine;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
 {
     [Obsolete]
     public abstract class ViewContainer : SerializedScriptableObject
     {
-        public abstract string GetViewPath<T>() where T : MonoBehaviour, IViewBase;
+        public abstract string GetViewPath<T>() where T : IViewBase;
         public abstract string GetViewPath(Type viewType);
         public abstract void AddView(IViewBase view);
     }

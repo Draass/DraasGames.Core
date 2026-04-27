@@ -32,8 +32,12 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete
             return _instantiator.InstantiatePrefabForComponent<IViewBase>(viewPrefab);
         }
 
-        public async UniTask<T> Create<T>() where T : MonoBehaviour, IViewBase
+        public async UniTask<T> Create<T>() where T : IViewBase
         {
+            var viewType = typeof(T);
+            if (!typeof(MonoBehaviour).IsAssignableFrom(viewType))
+                throw new ArgumentException($"Type {viewType} is not a MonoBehaviour");
+
             var viewPrefab = await _viewProviderAsync.GetViewAsync<T>() as MonoBehaviour;
 
             return _instantiator.InstantiatePrefabForComponent<T>(viewPrefab);
