@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.Infrastructure.Loaders.Abstract;
+using DraasGames.Core.Runtime.Infrastructure.Logger;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Pool;
@@ -18,19 +19,53 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
         public UniTask<T> LoadAsync<T>(AssetReference assetReference, ILifetime lifetime = null,
             Action<float> onProgress = null)
         {
-            var handle = Addressables.LoadAssetAsync<T>(assetReference);
+            if (assetReference == null)
+            {
+                DLogger.LogError($"Asset reference is null for type: {typeof(T)}!", this);
+                return UniTask.FromResult(default(T));
+            }
+
+            AsyncOperationHandle<T> handle;
+            
+            try
+            {
+                handle = Addressables.LoadAssetAsync<T>(assetReference);
+            }
+            catch (Exception e)
+            {
+                DLogger.LogError($"Failed to load asset reference! Exception: {e}", this);
+                return UniTask.FromResult(default(T));
+            }
+            
             return TrackAwaitWithProgress(lifetime, handle, onProgress);
         }
 
         public UniTask<T> LoadAsync<T>(string key, ILifetime lifetime = null, Action<float> onProgress = null)
         {
-            var handle = Addressables.LoadAssetAsync<T>(key);
+            AsyncOperationHandle<T> handle;
+            
+            try
+            {
+                handle = Addressables.LoadAssetAsync<T>(key);
+            }
+            catch (Exception e)
+            {
+                DLogger.LogError($"Failed to load asset reference! Exception: {e}", this);
+                return UniTask.FromResult(default(T));
+            }
+            
             return TrackAwaitWithProgress(lifetime, handle, onProgress);
         }
 
         public async UniTask<T> LoadWithComponentAsync<T>(AssetReference assetReference, ILifetime lifetime = null,
             Action<float> onProgress = null) where T : Component
         {
+            if (assetReference == null)
+            {
+                DLogger.LogError($"Asset reference is null for type: {typeof(T)}!", this);
+                return null;
+            }
+            
             var go = await LoadAsync<GameObject>(assetReference, lifetime, onProgress);
             
             if (!go.TryGetComponent<T>(out var component))
@@ -80,7 +115,10 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
 
         private void RegisterHandle<T>(ILifetime lifetime, AsyncOperationHandle<T> handle)
         {
-            if (lifetime == null) throw new ArgumentNullException(nameof(lifetime));
+            if (lifetime == null)
+            {
+                throw new ArgumentNullException(nameof(lifetime));
+            }
 
             if (!_handles.TryGetValue(lifetime, out var list))
             {
