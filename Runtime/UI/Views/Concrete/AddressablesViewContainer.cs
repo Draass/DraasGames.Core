@@ -6,7 +6,6 @@ using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -30,17 +29,13 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         [OdinSerialize, BoxGroup("Entries")]
         private List<ViewEntry> _entries = new();
 
-        // Legacy backing store kept for one-time migration from the old dictionary-based format.
-        // Using FormerlySerializedAs to pick up previously serialized data named "_entries".
-        [FormerlySerializedAs("_entries")]
-        [OdinSerialize, HideInInspector]
-        private Dictionary<Type, AssetReferenceGameObject> _legacyEntries = new();
-
         private Dictionary<Type, AssetReference> _viewMap;
 
         private void OnEnable()
         {
-            TryMigrateLegacyEntries();
+#if UNITY_EDITOR
+            SyncConfiguredViewEntries();
+#endif
             RebuildMap();
         }
 
@@ -108,25 +103,54 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             return depth;
         }
 
-        private void TryMigrateLegacyEntries()
+        private bool AddOrReplaceEntry(Type type, AssetReferenceGameObject prefab, bool recordUndo = true)
         {
-            if (_legacyEntries == null || _legacyEntries.Count == 0)
+            if (type == null || prefab == null) return false;
+
+#if UNITY_EDITOR
+            if (recordUndo)
             {
-                return;
+                Undo.RecordObject(this, "Add/Replace View Entry");
+            }
+#endif
+
+            if (_entries == null)
+            {
+                _entries = new List<ViewEntry>();
             }
 
-            if (_entries == null || _entries.Count == 0)
+            for (int i = 0; i < _entries.Count; i++)
             {
-                foreach (var kv in _legacyEntries)
+                var e = _entries[i];
+                if (e != null && e.ViewType == type)
                 {
-                    if (kv.Key == null || kv.Value == null) continue;
-                    _entries.Add(new ViewEntry { ViewType = kv.Key, Prefab = kv.Value });
-                }
+                    if (AssetReferencesMatch(e.Prefab, prefab))
+                    {
+                        return false;
+                    }
+
+                    e.Prefab = prefab;
+                    _entries[i] = e;
 #if UNITY_EDITOR
-                _legacyEntries.Clear();
-                EditorUtility.SetDirty(this);
+                    EditorUtility.SetDirty(this);
 #endif
+                    return true;
+                }
             }
+
+            _entries.Add(new ViewEntry { ViewType = type, Prefab = prefab });
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(this);
+#endif
+            return true;
+        }
+
+        private static bool AssetReferencesMatch(AssetReference left, AssetReference right)
+        {
+            if (ReferenceEquals(left, right)) return true;
+            if (left == null || right == null) return false;
+
+            return left.AssetGUID == right.AssetGUID;
         }
 
 #if UNITY_EDITOR
@@ -148,11 +172,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             EditorGUILayout.Space();
         }
 
-        [Title("Add Single", null, TitleAlignments.Left, true, true)]
-        [SerializeField, BoxGroup("Options")]
-        private AssetReferenceGameObject _singleViewRef;
-
-        [Title("Add Multiple", null, TitleAlignments.Left, true, true)]
+        [Title("Views", null, TitleAlignments.Left, true, true)]
         [SerializeField, BoxGroup("Options")]
         private List<AssetReferenceGameObject> _viewsToAdd = new();
         
@@ -163,61 +183,37 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         
         private void OnValidate()
         {
-            TryMigrateLegacyEntries();
+            SyncConfiguredViewEntries();
             RebuildMap();
         }
 
-        [Button]
-        private void AddSingleFromField()
+        private void SyncConfiguredViewEntries()
         {
-            if (_singleViewRef != null)
+            if (_viewsToAdd == null)
             {
-                AddView(_singleViewRef);
+                return;
+            }
+
+            for (int i = 0; i < _viewsToAdd.Count; i++)
+            {
+                AddConfiguredViewEntry(_viewsToAdd[i], false);
             }
         }
 
-        [Button]
-        private void AddView(AssetReferenceGameObject view)
-        {
-            if (view == null)
-            {
-                return;
-            }
-
-            var assetGo = view.editorAsset;
-            if (assetGo == null)
-            {
-                return;
-            }
-
-            var component = assetGo.GetComponent<ViewBase>();
-            if (component == null)
-            {
-                return;
-            }
-
-            var type = component.GetType();
-            AddOrReplaceEntry(type, view);
-            RebuildMap();
-        }
-        
         [Button]
         private void AddViews()
         {
 #if UNITY_EDITOR
             Undo.RecordObject(this, "Add Multiple Views");
 #endif
+            if (_viewsToAdd == null)
+            {
+                return;
+            }
+
             foreach (var view in _viewsToAdd)
             {
-                if (view == null) continue;
-                var assetGo = view.editorAsset as GameObject;
-                if (assetGo == null) continue;
-
-                var component = assetGo.GetComponent<ViewBase>();
-                if (component == null) continue;
-
-                var type = component.GetType();
-                AddOrReplaceEntry(type, view);
+                AddConfiguredViewEntry(view, false);
             }
 
             RebuildMap();
@@ -246,6 +242,9 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
 
             if (queued > 0)
             {
+                SyncConfiguredViewEntries();
+                RebuildMap();
+                EditorUtility.SetDirty(this);
                 GUI.changed = true;
                 Debug.Log($"Queued {queued} view(s) to list from selection");
             }
@@ -315,6 +314,9 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
                     }
                     if (queued > 0)
                     {
+                        SyncConfiguredViewEntries();
+                        RebuildMap();
+                        EditorUtility.SetDirty(this);
                         GUI.changed = true;
                         Debug.Log($"Queued {queued} view(s) to list via drag & drop");
                     }
@@ -353,37 +355,46 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             }
         }
 
-        private void AddOrReplaceEntry(Type type, AssetReferenceGameObject prefab)
+        private bool AddConfiguredViewEntry(AssetReferenceGameObject view, bool recordUndo)
         {
-            if (type == null || prefab == null) return;
-
-#if UNITY_EDITOR
-            Undo.RecordObject(this, "Add/Replace View Entry");
-#endif
-
-            if (_entries == null)
+            if (view == null)
             {
-                _entries = new List<ViewEntry>();
+                return false;
             }
 
-            for (int i = 0; i < _entries.Count; i++)
+            if (!TryGetReferencedGameObject(view, out var assetGo))
             {
-                var e = _entries[i];
-                if (e != null && e.ViewType == type)
+                return false;
+            }
+
+            return TryGetViewTypeFromGameObject(assetGo, out var type)
+                && AddOrReplaceEntry(type, view, recordUndo);
+        }
+
+        private static bool TryGetReferencedGameObject(AssetReferenceGameObject view, out GameObject assetGo)
+        {
+            assetGo = null;
+
+            if (!string.IsNullOrEmpty(view.AssetGUID))
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(view.AssetGUID);
+                if (!string.IsNullOrEmpty(assetPath))
                 {
-                    e.Prefab = prefab;
-                    _entries[i] = e;
-#if UNITY_EDITOR
-                    EditorUtility.SetDirty(this);
-#endif
-                    return;
+                    assetGo = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+                    if (assetGo != null)
+                    {
+                        return true;
+                    }
                 }
             }
 
-            _entries.Add(new ViewEntry { ViewType = type, Prefab = prefab });
-#if UNITY_EDITOR
-            EditorUtility.SetDirty(this);
-#endif
+            assetGo = view.editorAsset;
+            if (assetGo != null)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static bool TryGetViewTypeFromGameObject(GameObject assetGo, out Type type)
@@ -404,8 +415,8 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
 #endif
             _entries.Clear();
             _viewMap?.Clear();
+            _viewsToAdd?.Clear();
 #if UNITY_EDITOR
-            _legacyEntries?.Clear();
             EditorUtility.SetDirty(this);
 #endif
         }
