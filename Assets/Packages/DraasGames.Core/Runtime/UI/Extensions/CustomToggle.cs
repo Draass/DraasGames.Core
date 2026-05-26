@@ -114,6 +114,8 @@ namespace DraasGames.Core.Runtime.UI.Extensions
             switch (_toggleMode)
             {
                 case ToggleMode.None:
+                    if (_switchEffect == SwitchEffect.Custom)
+                        PlaySwitchEffect();
                     break;
                 case ToggleMode.ToggleSingle:
                     ToggleSingeOnEffect();
@@ -130,14 +132,7 @@ namespace DraasGames.Core.Runtime.UI.Extensions
         {
             if (_switchEffect == SwitchEffect.Custom)
             {
-                if (IsOn)
-                {
-                    _toggleSwitchEffect.Play();
-                }
-                else
-                {
-                    _toggleInactiveSwitchEffect.Play();
-                }
+                PlaySwitchEffect();
             }
             else if (_switchEffect == SwitchEffect.None)
             {
@@ -149,19 +144,24 @@ namespace DraasGames.Core.Runtime.UI.Extensions
         {
             if(_switchEffect == SwitchEffect.Custom)
             {
-                if (IsOn)
-                {
-                    _toggleSwitchEffect.Play();
-                }
-                else
-                {
-                    _toggleInactiveSwitchEffect.Play();
-                }
+                PlaySwitchEffect();
             }
             else if (_switchEffect == SwitchEffect.None)
             {
                 _activeGraphic?.SetActive(IsOn);
                 _inactiveGraphic?.SetActive(!IsOn);
+            }
+        }
+
+        private void PlaySwitchEffect()
+        {
+            if (IsOn)
+            {
+                _toggleSwitchEffect.Play();
+            }
+            else
+            {
+                _toggleInactiveSwitchEffect.Play();
             }
         }
     }
