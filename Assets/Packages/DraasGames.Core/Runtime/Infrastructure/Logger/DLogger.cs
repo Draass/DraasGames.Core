@@ -23,6 +23,20 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
             }
         }
 
+        /// <summary>
+        /// Raised for every message that passes the <see cref="MinimumLevel"/> gate, just before it
+        /// is forwarded to the registered <see cref="ILoggerService"/> sinks. Carries a structured
+        /// <see cref="DLogEntry"/> (level, message, sender, future tags) for console-style views.
+        /// </summary>
+        public static event Action<DLogEntry> MessageLogged;
+
+        /// <summary>
+        /// True while DLogger is forwarding a message to its sinks. A listener on
+        /// <see cref="UnityEngine.Application.logMessageReceived"/> can check this to skip the echo
+        /// Unity raises for messages that originated from DLogger, avoiding duplicate records.
+        /// </summary>
+        public static bool IsDispatching { get; private set; }
+
         static DLogger()
         {
 #if UNITY_EDITOR
@@ -60,10 +74,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                 return;
             }
 
-            foreach (var logger in Loggers)
-            {
-                logger.Log(message, sender);
-            }
+            Dispatch(DLogLevel.Info, message, sender, null);
         }
 
         public static void LogWarning(string message, object sender = null)
@@ -73,10 +84,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                 return;
             }
 
-            foreach (var logger in Loggers)
-            {
-                logger.LogWarning(message, sender);
-            }
+            Dispatch(DLogLevel.Warning, message, sender, null);
         }
 
         public static void LogError(string message, object sender = null)
@@ -86,10 +94,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                 return;
             }
 
-            foreach (var logger in Loggers)
-            {
-                logger.LogError(message, sender);
-            }
+            Dispatch(DLogLevel.Error, message, sender, null);
         }
 
         public static void LogException(Exception exception)
@@ -99,9 +104,46 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                 return;
             }
 
-            foreach (var logger in Loggers)
+            Dispatch(DLogLevel.Exception, exception?.Message, null, exception);
+        }
+
+        private static void Dispatch(DLogLevel level, string message, object sender, Exception exception)
+        {
+            // Raise the structured signal first so listeners (e.g. the editor console window) record a
+            // clean entry. Only allocate the entry when something is actually listening.
+            if (MessageLogged != null)
             {
-                logger.LogException(exception);
+                var entry = new DLogEntry(level, message, sender?.GetType().Name, exception, DLogSource.DLogger);
+                MessageLogged.Invoke(entry);
+            }
+
+            // Forwarding to sinks calls UnityEngine.Debug, which makes Unity re-raise the same message
+            // through Application.logMessageReceived. IsDispatching lets that listener drop the echo.
+            IsDispatching = true;
+            try
+            {
+                foreach (var logger in Loggers)
+                {
+                    switch (level)
+                    {
+                        case DLogLevel.Info:
+                            logger.Log(message, sender);
+                            break;
+                        case DLogLevel.Warning:
+                            logger.LogWarning(message, sender);
+                            break;
+                        case DLogLevel.Error:
+                            logger.LogError(message, sender);
+                            break;
+                        case DLogLevel.Exception:
+                            logger.LogException(exception);
+                            break;
+                    }
+                }
+            }
+            finally
+            {
+                IsDispatching = false;
             }
         }
 
