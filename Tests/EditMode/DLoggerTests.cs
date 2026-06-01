@@ -67,6 +67,94 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             Assert.That(_logger.ExceptionCount, Is.EqualTo(1));
         }
 
+        [Test]
+        public void MessageLogged_ShouldRaiseStructuredEntryForMessagesThatPassMinimumLevel()
+        {
+            DLogger.MinimumLevel = DLogLevel.Info;
+
+            DLogEntry? captured = null;
+
+            void Handler(DLogEntry entry) => captured = entry;
+
+            DLogger.MessageLogged += Handler;
+            try
+            {
+                DLogger.Log("hello", this);
+            }
+            finally
+            {
+                DLogger.MessageLogged -= Handler;
+            }
+
+            Assert.That(captured.HasValue, Is.True);
+            Assert.That(captured.Value.Level, Is.EqualTo(DLogLevel.Info));
+            Assert.That(captured.Value.Message, Is.EqualTo("hello"));
+            Assert.That(captured.Value.Sender, Is.EqualTo(nameof(DLoggerTests)));
+            Assert.That(captured.Value.Source, Is.EqualTo(DLogSource.DLogger));
+            Assert.That(captured.Value.Tags, Is.Empty);
+        }
+
+        [Test]
+        public void MessageLogged_ShouldNotRaiseForMessagesBelowMinimumLevel()
+        {
+            DLogger.MinimumLevel = DLogLevel.Warning;
+
+            var raised = 0;
+
+            void Handler(DLogEntry entry) => raised++;
+
+            DLogger.MessageLogged += Handler;
+            try
+            {
+                DLogger.Log("info");
+                DLogger.LogWarning("warning");
+            }
+            finally
+            {
+                DLogger.MessageLogged -= Handler;
+            }
+
+            Assert.That(raised, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void IsDispatching_ShouldBeTrueWhileForwardingAndResetAfterwards()
+        {
+            var probe = new DispatchProbeLoggerService();
+            DLogger.RemoveAllLoggers();
+            DLogger.AddLogger(probe);
+            DLogger.MinimumLevel = DLogLevel.Info;
+
+            Assert.That(DLogger.IsDispatching, Is.False);
+
+            DLogger.Log("dispatch");
+
+            Assert.That(probe.WasDispatchingDuringLog, Is.True);
+            Assert.That(DLogger.IsDispatching, Is.False);
+        }
+
+        private sealed class DispatchProbeLoggerService : ILoggerService
+        {
+            public bool WasDispatchingDuringLog { get; private set; }
+
+            public void Log(string message, object sender = null)
+            {
+                WasDispatchingDuringLog = DLogger.IsDispatching;
+            }
+
+            public void LogWarning(string message, object sender = null)
+            {
+            }
+
+            public void LogError(string message, object sender = null)
+            {
+            }
+
+            public void LogException(Exception exception)
+            {
+            }
+        }
+
         private sealed class TestLoggerService : ILoggerService
         {
             public int InfoCount { get; private set; }
