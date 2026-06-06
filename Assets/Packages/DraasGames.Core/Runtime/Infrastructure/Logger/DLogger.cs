@@ -67,55 +67,62 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
             _minimumLevelInitialized = true;
         }
 
-        public static void Log(string message, object sender = null)
+        public static void Log(string message, object sender = null, params DLogTag[] tags)
         {
             if (!ShouldLog(DLogLevel.Info))
             {
                 return;
             }
 
-            Dispatch(DLogLevel.Info, message, sender, null);
+            Dispatch(DLogLevel.Info, message, sender, null, tags);
         }
 
-        public static void LogWarning(string message, object sender = null)
+        public static void LogWarning(string message, object sender = null, params DLogTag[] tags)
         {
             if (!ShouldLog(DLogLevel.Warning))
             {
                 return;
             }
 
-            Dispatch(DLogLevel.Warning, message, sender, null);
+            Dispatch(DLogLevel.Warning, message, sender, null, tags);
         }
 
-        public static void LogError(string message, object sender = null)
+        public static void LogError(string message, object sender = null, params DLogTag[] tags)
         {
             if (!ShouldLog(DLogLevel.Error))
             {
                 return;
             }
 
-            Dispatch(DLogLevel.Error, message, sender, null);
+            Dispatch(DLogLevel.Error, message, sender, null, tags);
         }
 
-        public static void LogException(Exception exception)
+        public static void LogException(Exception exception, params DLogTag[] tags)
         {
             if (!ShouldLog(DLogLevel.Exception))
             {
                 return;
             }
 
-            Dispatch(DLogLevel.Exception, exception?.Message, null, exception);
+            Dispatch(DLogLevel.Exception, exception?.Message, null, exception, tags);
         }
 
-        private static void Dispatch(DLogLevel level, string message, object sender, Exception exception)
+        private static void Dispatch(DLogLevel level, string message, object sender, Exception exception, DLogTag[] tags)
         {
+            var tagNames = ToTagNames(tags);
+
             // Raise the structured signal first so listeners (e.g. the editor console window) record a
-            // clean entry. Only allocate the entry when something is actually listening.
+            // clean entry, with the tags intact. Only allocate the entry when something is listening.
             if (MessageLogged != null)
             {
-                var entry = new DLogEntry(level, message, sender?.GetType().Name, exception, DLogSource.DLogger);
+                var entry = new DLogEntry(level, message, sender?.GetType().Name, exception, DLogSource.DLogger, tagNames);
                 MessageLogged.Invoke(entry);
             }
+
+            // Surface tags in the regular Unity console too by prefixing the forwarded message.
+            var sinkMessage = tagNames.Length > 0
+                ? "[" + string.Join("][", tagNames) + "] " + message
+                : message;
 
             // Forwarding to sinks calls UnityEngine.Debug, which makes Unity re-raise the same message
             // through Application.logMessageReceived. IsDispatching lets that listener drop the echo.
@@ -127,13 +134,13 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
                     switch (level)
                     {
                         case DLogLevel.Info:
-                            logger.Log(message, sender);
+                            logger.Log(sinkMessage, sender);
                             break;
                         case DLogLevel.Warning:
-                            logger.LogWarning(message, sender);
+                            logger.LogWarning(sinkMessage, sender);
                             break;
                         case DLogLevel.Error:
-                            logger.LogError(message, sender);
+                            logger.LogError(sinkMessage, sender);
                             break;
                         case DLogLevel.Exception:
                             logger.LogException(exception);
@@ -145,6 +152,22 @@ namespace DraasGames.Core.Runtime.Infrastructure.Logger
             {
                 IsDispatching = false;
             }
+        }
+
+        private static string[] ToTagNames(DLogTag[] tags)
+        {
+            if (tags == null || tags.Length == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var names = new string[tags.Length];
+            for (var i = 0; i < tags.Length; i++)
+            {
+                names[i] = tags[i].Name;
+            }
+
+            return names;
         }
 
         private static bool ShouldLog(DLogLevel messageLevel)
