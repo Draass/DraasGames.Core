@@ -133,6 +133,29 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             Assert.That(DLogger.IsDispatching, Is.False);
         }
 
+        [Test]
+        public void MessageLogged_ShouldCarryProvidedTags()
+        {
+            DLogger.MinimumLevel = DLogLevel.Info;
+
+            DLogEntry? captured = null;
+
+            void Handler(DLogEntry entry) => captured = entry;
+
+            DLogger.MessageLogged += Handler;
+            try
+            {
+                DLogger.Log("tagged", this, DLogTag.Of("Alpha"), DLogTag.Of("Beta"));
+            }
+            finally
+            {
+                DLogger.MessageLogged -= Handler;
+            }
+
+            Assert.That(captured.HasValue, Is.True);
+            Assert.That(captured.Value.Tags, Is.EquivalentTo(new[] { "Alpha", "Beta" }));
+        }
+
         private sealed class DispatchProbeLoggerService : ILoggerService
         {
             public bool WasDispatchingDuringLog { get; private set; }
@@ -140,6 +163,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             public void Log(string message, object sender = null)
             {
                 WasDispatchingDuringLog = DLogger.IsDispatching;
+                DLogger.Log(message, this);
             }
 
             public void LogWarning(string message, object sender = null)

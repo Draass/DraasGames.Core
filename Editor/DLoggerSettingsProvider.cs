@@ -72,6 +72,55 @@ namespace Packages.DraasGames.Core.Editor
                     ReloadLoggerSettings();
                 }
             }
+
+            DrawTagsSection(settings, serializedObject);
+        }
+
+        private static void DrawTagsSection(UnityEngine.Object settings, SerializedObject serializedObject)
+        {
+            var tagsProperty = serializedObject.FindProperty("_tags");
+            var namespaceProperty = serializedObject.FindProperty("_generatedTagsNamespace");
+            var pathProperty = serializedObject.FindProperty("_generatedTagsPath");
+            if (tagsProperty == null)
+            {
+                return;
+            }
+
+            EditorGUILayout.Space(6f);
+
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Tags", EditorStyles.boldLabel);
+                EditorGUILayout.HelpBox(
+                    "Define tag names, then generate the DLogTags constants class for compile-safe usage:\n" +
+                    "DLogger.Log(\"msg\", this, DLogTags.UI);",
+                    MessageType.Info);
+
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(tagsProperty, new GUIContent("Tags"), true);
+                EditorGUILayout.PropertyField(namespaceProperty, new GUIContent("Namespace"));
+                EditorGUILayout.PropertyField(pathProperty, new GUIContent("Output Path"));
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    serializedObject.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(settings);
+                    AssetDatabase.SaveAssets();
+                }
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Open Tags Editor"))
+                    {
+                        DLogTagsWindow.Open();
+                    }
+
+                    if (GUILayout.Button("Generate Tags"))
+                    {
+                        DLogTagsGenerator.GenerateFromSettings();
+                    }
+                }
+            }
         }
 
         private static UnityEngine.Object GetOrCreateSettingsAsset()

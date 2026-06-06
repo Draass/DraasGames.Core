@@ -13,15 +13,18 @@ namespace Packages.DraasGames.Core.Editor.Console
 {
     /// <summary>
     /// A Unity-console-like window for <see cref="DLogger"/>: a virtualized list of captured messages
-    /// with toggle filters per level, free-text search, a Collapse mode that groups identical messages
-    /// with an occurrence count, and a detail pane with a clickable stack trace. Double-clicking a row
-    /// jumps to its source line; clicking a frame in the detail pane jumps to that exact line. Tag
-    /// filters appear automatically once entries carry tags.
+    /// with per-level toggle filters, a multi-select Tags dropdown, free-text search, a Collapse mode
+    /// that groups identical messages with an occurrence count, and a detail pane with a clickable
+    /// stack trace. Double-clicking a row jumps to its source line; clicking a frame in the detail pane
+    /// jumps to that exact line.
     /// </summary>
     internal sealed class DConsoleWindow : EditorWindow
     {
         private const int LevelCount = 4; // Info, Warning, Error, Exception
         private const float RowHeight = 22f;
+
+        // Reserved pseudo-tag used by the Tags filter to mean "messages without any tag".
+        private const string NoneTag = "None";
 
         private const string CollapsePrefKey = "DraasGames.DConsole.Collapse";
         private const string AutoScrollPrefKey = "DraasGames.DConsole.AutoScroll";
@@ -36,8 +39,8 @@ namespace Packages.DraasGames.Core.Editor.Console
         private Label[] _levelCountLabels;
 
         private ListView _list;
+        private ToolbarButton _tagsButton;
         private VisualElement _detailContainer;
-        private VisualElement _tagContainer;
         private List<string> _knownTags = new();
 
         private string _search = string.Empty;
@@ -135,9 +138,10 @@ namespace Packages.DraasGames.Core.Editor.Console
             });
             toolbar.Add(search);
 
-            _tagContainer = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
-            _tagContainer.style.display = DisplayStyle.None;
-            toolbar.Add(_tagContainer);
+            _tagsButton = new ToolbarButton { text = "Tags" };
+            _tagsButton.style.flexShrink = 0;
+            _tagsButton.clicked += OpenTagsMenu;
+            toolbar.Add(_tagsButton);
 
             for (var i = 0; i < LevelCount; i++)
             {
@@ -145,6 +149,12 @@ namespace Packages.DraasGames.Core.Editor.Console
             }
 
             return toolbar;
+        }
+
+        private void OpenTagsMenu()
+        {
+            // PopupWindow stays open across multiple toggles (unlike GenericMenu, which closes on click).
+            UnityEditor.PopupWindow.Show(_tagsButton.worldBound, new TagsPopupContent(this));
         }
 
         private VisualElement CreateLevelFilter(int index, DLogLevel level)
@@ -230,6 +240,13 @@ namespace Packages.DraasGames.Core.Editor.Console
             message.style.unityTextAlign = TextAnchor.MiddleLeft;
             row.Add(message);
 
+            var tags = new Label { name = "tags" };
+            tags.style.flexShrink = 0;
+            tags.style.marginLeft = 8;
+            tags.style.unityTextAlign = TextAnchor.MiddleRight;
+            tags.style.color = new Color(0.45f, 0.6f, 1f);
+            row.Add(tags);
+
             var meta = new Label { name = "meta" };
             meta.style.flexShrink = 0;
             meta.style.marginLeft = 8;
@@ -277,6 +294,12 @@ namespace Packages.DraasGames.Core.Editor.Console
             {
                 message.text = SingleLine(entry.Message);
                 message.style.color = ColorFor(entry.Level);
+            }
+
+            var tags = element.Q<Label>("tags");
+            if (tags != null)
+            {
+                tags.text = BuildTags(entry);
             }
 
             var meta = element.Q<Label>("meta");
@@ -383,7 +406,7 @@ namespace Packages.DraasGames.Core.Editor.Console
             _list.RefreshItems();
             HideEmptyLabel();
             UpdateCounts();
-            UpdateTagFilters();
+            RefreshKnownTags();
 
             if (_autoScroll && _rows.Count > 0)
             {
@@ -427,19 +450,29 @@ namespace Packages.DraasGames.Core.Editor.Console
                 }
             }
 
+            // Empty selection means "All" — no tag filtering.
             if (_activeTags.Count > 0)
             {
-                var hit = false;
-                for (var i = 0; i < entry.Tags.Count; i++)
+                var tags = entry.Tags;
+                bool pass;
+                if (tags == null || tags.Count == 0)
                 {
-                    if (_activeTags.Contains(entry.Tags[i]))
+                    pass = _activeTags.Contains(NoneTag);
+                }
+                else
+                {
+                    pass = false;
+                    for (var i = 0; i < tags.Count; i++)
                     {
-                        hit = true;
-                        break;
+                        if (_activeTags.Contains(tags[i]))
+                        {
+                            pass = true;
+                            break;
+                        }
                     }
                 }
 
-                if (!hit)
+                if (!pass)
                 {
                     return false;
                 }
@@ -460,55 +493,82 @@ namespace Packages.DraasGames.Core.Editor.Console
         }
 
         /// <summary>
-        /// Rebuilds the tag-filter row from the union of tags present in the buffer. Stays hidden while
-        /// no entry carries tags, so it lights up automatically once DLogger starts attaching them —
-        /// no further window changes required.
+        /// Refreshes the set of known tags (union of tags in the buffer and tags declared in settings),
+        /// so the Tags dropdown lists defined-but-not-yet-logged tags too. The reserved <see cref="NoneTag"/>
+        /// is excluded from real tags and offered separately by the dropdown.
         /// </summary>
-        private void UpdateTagFilters()
+        private void RefreshKnownTags()
         {
             var seen = new HashSet<string>();
+
             var source = DConsoleRecorder.Snapshot;
             for (var i = 0; i < source.Count; i++)
             {
                 var tags = source[i].Tags;
                 for (var t = 0; t < tags.Count; t++)
                 {
-                    seen.Add(tags[t]);
+                    if (!string.IsNullOrEmpty(tags[t]))
+                    {
+                        seen.Add(tags[t]);
+                    }
                 }
             }
 
-            if (seen.Count == _knownTags.Count && seen.SetEquals(_knownTags))
+            var settings = Resources.Load<DLoggerSettings>(DLoggerSettings.ResourcePath);
+            if (settings != null)
+            {
+                foreach (var tag in settings.Tags)
+                {
+                    if (!string.IsNullOrEmpty(tag))
+                    {
+                        seen.Add(tag);
+                    }
+                }
+            }
+
+            seen.Remove(NoneTag); // reserved for the "untagged" filter
+
+            if (seen.Count != _knownTags.Count || !seen.SetEquals(_knownTags))
+            {
+                _knownTags = new List<string>(seen);
+                _knownTags.Sort(StringComparer.OrdinalIgnoreCase);
+
+                // Drop selections for tags that no longer exist (keep the reserved None token).
+                _activeTags.RemoveWhere(tag => tag != NoneTag && !seen.Contains(tag));
+            }
+
+            UpdateTagsButton();
+        }
+
+        private void UpdateTagsButton()
+        {
+            if (_tagsButton != null)
+            {
+                _tagsButton.text = _activeTags.Count > 0 ? "Tags *" : "Tags";
+            }
+        }
+
+        private void SelectAllTagsFromMenu()
+        {
+            if (_activeTags.Count == 0)
             {
                 return;
             }
 
-            _knownTags = new List<string>(seen);
-            _knownTags.Sort(StringComparer.OrdinalIgnoreCase);
+            _activeTags.Clear();
+            _dirty = true;
+            UpdateTagsButton();
+        }
 
-            _tagContainer.Clear();
-            _activeTags.RemoveWhere(tag => !seen.Contains(tag));
-
-            foreach (var tag in _knownTags)
+        private void ToggleTagFromMenu(string tag)
+        {
+            if (!_activeTags.Remove(tag))
             {
-                var capturedTag = tag;
-                var toggle = new ToolbarToggle { text = tag, value = _activeTags.Contains(tag) };
-                toggle.RegisterValueChangedCallback(evt =>
-                {
-                    if (evt.newValue)
-                    {
-                        _activeTags.Add(capturedTag);
-                    }
-                    else
-                    {
-                        _activeTags.Remove(capturedTag);
-                    }
-
-                    _dirty = true;
-                });
-                _tagContainer.Add(toggle);
+                _activeTags.Add(tag);
             }
 
-            _tagContainer.style.display = _knownTags.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            _dirty = true;
+            UpdateTagsButton();
         }
 
         private void OnSelectionChanged(IEnumerable<object> selection)
@@ -549,6 +609,11 @@ namespace Packages.DraasGames.Core.Editor.Console
             if (count > 1)
             {
                 header.Append('x').Append(count).Append("   ");
+            }
+
+            if (entry.Tags != null && entry.Tags.Count > 0)
+            {
+                header.Append(BuildTags(entry)).Append(' ');
             }
 
             if (!string.IsNullOrEmpty(entry.Sender))
@@ -623,6 +688,17 @@ namespace Packages.DraasGames.Core.Editor.Console
             return string.IsNullOrEmpty(entry.Sender) ? time : entry.Sender + "   " + time;
         }
 
+        private static string BuildTags(DConsoleEntry entry)
+        {
+            var tags = entry.Tags;
+            if (tags == null || tags.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return "[" + string.Join("][", tags) + "]";
+        }
+
         private static Color ColorFor(DLogLevel level)
         {
             switch (level)
@@ -651,6 +727,78 @@ namespace Packages.DraasGames.Core.Editor.Console
         {
             public DConsoleEntry Entry;
             public int Count;
+        }
+
+        /// <summary>
+        /// Stay-open multi-select popup for the Tags dropdown: an "All" reset, the reserved "None"
+        /// (untagged) option, and a toggle per known tag. Toggling does not close the popup.
+        /// </summary>
+        private sealed class TagsPopupContent : PopupWindowContent
+        {
+            private const float RowHeight = 20f;
+            private const int MaxVisibleTagRows = 7;
+
+            private readonly DConsoleWindow _window;
+            private Vector2 _scroll;
+
+            public TagsPopupContent(DConsoleWindow window)
+            {
+                _window = window;
+            }
+
+            public override Vector2 GetWindowSize()
+            {
+                var tagRows = Mathf.Clamp(_window._knownTags.Count, 1, MaxVisibleTagRows);
+                var height = 6f             // top padding
+                             + RowHeight     // All
+                             + RowHeight     // None
+                             + 9f            // separator
+                             + tagRows * RowHeight
+                             + 8f;           // bottom padding
+                return new Vector2(220f, height);
+            }
+
+            public override void OnGUI(Rect rect)
+            {
+                EditorGUILayout.Space(4f);
+
+                EditorGUI.BeginChangeCheck();
+                var allOn = EditorGUILayout.ToggleLeft("All", _window._activeTags.Count == 0);
+                if (EditorGUI.EndChangeCheck() && allOn)
+                {
+                    _window.SelectAllTagsFromMenu();
+                }
+
+                DrawTagToggle(NoneTag, "None (untagged)");
+
+                DrawSeparator();
+
+                _scroll = EditorGUILayout.BeginScrollView(_scroll);
+                foreach (var tag in _window._knownTags)
+                {
+                    DrawTagToggle(tag, tag);
+                }
+
+                EditorGUILayout.EndScrollView();
+            }
+
+            private void DrawTagToggle(string tag, string label)
+            {
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.ToggleLeft(label, _window._activeTags.Contains(tag));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    _window.ToggleTagFromMenu(tag);
+                }
+            }
+
+            private static void DrawSeparator()
+            {
+                EditorGUILayout.Space(3f);
+                var rect = EditorGUILayout.GetControlRect(false, 1f);
+                EditorGUI.DrawRect(rect, new Color(0f, 0f, 0f, 0.35f));
+                EditorGUILayout.Space(3f);
+            }
         }
     }
 }

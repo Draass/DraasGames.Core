@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using DraasGames.Core.Runtime.Infrastructure.Logger;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -34,6 +35,9 @@ namespace Packages.DraasGames.Core.Editor.Console
         /// <summary>Number of identical consecutive messages (reserved for a future Collapse mode).</summary>
         public int Count { get; set; }
 
+        /// <summary>True for compiler errors; these survive a manual Clear so they stay visible.</summary>
+        public bool IsCompileError { get; }
+
         public DConsoleEntry(
             DLogLevel level,
             string message,
@@ -44,7 +48,8 @@ namespace Packages.DraasGames.Core.Editor.Console
             LogType logType,
             string filePath,
             int line,
-            DateTime time)
+            DateTime time,
+            bool isCompileError = false)
         {
             Level = level;
             Message = message ?? string.Empty;
@@ -57,6 +62,7 @@ namespace Packages.DraasGames.Core.Editor.Console
             Line = line;
             Time = time;
             Count = 1;
+            IsCompileError = isCompileError;
         }
     }
 
@@ -105,6 +111,8 @@ namespace Packages.DraasGames.Core.Editor.Console
             DLogger.MessageLogged += OnDLoggerMessage;
             Application.logMessageReceived += OnUnityMessage;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            CompilationPipeline.compilationStarted += OnCompilationStarted;
+            CompilationPipeline.assemblyCompilationFinished += OnAssemblyCompilationFinished;
         }
 
         public static int GetCount(DLogLevel level)
@@ -115,8 +123,9 @@ namespace Packages.DraasGames.Core.Editor.Console
 
         public static void Clear()
         {
-            Entries.Clear();
-            Array.Clear(Counts, 0, Counts.Length);
+            // Keep compiler errors so clearing the console does not hide what is blocking the build.
+            Entries.RemoveAll(entry => !entry.IsCompileError);
+            RecountLevels();
             Changed?.Invoke();
         }
 
@@ -215,6 +224,63 @@ namespace Packages.DraasGames.Core.Editor.Console
             if (state == PlayModeStateChange.ExitingEditMode && ClearOnPlay)
             {
                 Clear();
+            }
+        }
+
+        private static void OnCompilationStarted(object context)
+        {
+            // A fresh compile round invalidates the previously reported compiler errors.
+            RemoveCompileErrors();
+        }
+
+        private static void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages)
+        {
+            if (messages == null)
+            {
+                return;
+            }
+
+            foreach (var message in messages)
+            {
+                if (message.type != CompilerMessageType.Error)
+                {
+                    continue;
+                }
+
+                Add(new DConsoleEntry(
+                    DLogLevel.Error,
+                    message.message,
+                    null,
+                    string.Empty,
+                    DLogSource.Unity,
+                    Array.Empty<string>(),
+                    LogType.Error,
+                    ToAbsolute(message.file),
+                    message.line,
+                    DateTime.Now,
+                    isCompileError: true));
+            }
+        }
+
+        private static void RemoveCompileErrors()
+        {
+            if (Entries.RemoveAll(entry => entry.IsCompileError) > 0)
+            {
+                RecountLevels();
+                Changed?.Invoke();
+            }
+        }
+
+        private static void RecountLevels()
+        {
+            Array.Clear(Counts, 0, Counts.Length);
+            for (var i = 0; i < Entries.Count; i++)
+            {
+                var level = (int)Entries[i].Level;
+                if (level >= 0 && level < LevelCount)
+                {
+                    Counts[level]++;
+                }
             }
         }
 
