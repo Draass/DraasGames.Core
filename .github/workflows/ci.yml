@@ -7,7 +7,9 @@ name: CI
 on:
   push:
     branches:
-    - main
+    - master
+    paths-ignore:
+    - 'Packages/com.draasgames.dlogger/**'
 jobs:
   release:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
@@ -44,7 +46,7 @@ jobs:
         fi
         git push -f -u origin upm
       env:
-        PKG_ROOT: "Packages/DraasGames.Core"
+        PKG_ROOT: "Assets/Packages/DraasGames.Core"
 
     - name: Create UPM git tag
       if: steps.semantic.outputs.new_release_published == 'true'

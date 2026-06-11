@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.Infrastructure.Loaders.Abstract;
-using DraasGames.Core.Runtime.Infrastructure.Logger;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Pool;
@@ -21,7 +20,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
         {
             if (assetReference == null)
             {
-                DLogger.LogError($"Asset reference is null for type: {typeof(T)}!", this);
+                CoreLog.Error($"Asset reference is null for type: {typeof(T)}!", this);
                 return UniTask.FromResult(default(T));
             }
 
@@ -33,7 +32,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
             }
             catch (Exception e)
             {
-                DLogger.LogError($"Failed to load asset reference! Exception: {e}", this);
+                CoreLog.Error($"Failed to load asset reference! Exception: {e}", this);
                 return UniTask.FromResult(default(T));
             }
             
@@ -50,7 +49,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
             }
             catch (Exception e)
             {
-                DLogger.LogError($"Failed to load asset reference! Exception: {e}", this);
+                CoreLog.Error($"Failed to load asset reference! Exception: {e}", this);
                 return UniTask.FromResult(default(T));
             }
             
@@ -62,7 +61,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Loaders.Concrete
         {
             if (assetReference == null)
             {
-                DLogger.LogError($"Asset reference is null for type: {typeof(T)}!", this);
+                CoreLog.Error($"Asset reference is null for type: {typeof(T)}!", this);
                 return null;
             }
             

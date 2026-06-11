@@ -17,6 +17,12 @@
       "dependencies": {},
       "hash": "b0d01ca75fc890b76e81202d655d17c1f4214a18"
     },
+    "com.draasgames.dlogger": {
+      "version": "file:com.draasgames.dlogger",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.gustavopsantos.reflex": {
       "version": "https://github.com/gustavopsantos/reflex.git?path=/Assets/Reflex/#14.3.0",
       "depth": 0,

@@ -10,14 +10,14 @@ plugins:
   - '@semantic-release/release-notes-generator'
   - - '@semantic-release/changelog'
     - preset: angular
-      changelogFile: Packages/DraasGames.Core/CHANGELOG.md
+      changelogFile: Assets/Packages/DraasGames.Core/CHANGELOG.md
   - - '@semantic-release/npm'
     - npmPublish: false
-      pkgRoot: Packages/DraasGames.Core
+      pkgRoot: Assets/Packages/DraasGames.Core
   - - '@semantic-release/git'
     - assets:
-        - Packages/DraasGames.Core/package.json
-        - Packages/DraasGames.Core/CHANGELOG.md
+        - Assets/Packages/DraasGames.Core/package.json
+        - Assets/Packages/DraasGames.Core/CHANGELOG.md
       message: |-
         chore(release): ${nextRelease.version} [skip ci]
 

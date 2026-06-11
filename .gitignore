@@ -75,3 +75,6 @@ Assets/Plugins
 Assets/Resources/DOTweenSettings.asset
 Assets/Resources/DOTweenSettings.asset.meta
 .idea/.idea.DraasGames.Core NEW/.idea
+
+# DLogger lives in its own repository, embedded for development
+/Packages/com.draasgames.dlogger/
