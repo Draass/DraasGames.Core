@@ -13,6 +13,7 @@ namespace Packages.DraasGames.Core.Editor
             ("Unity.Addressables", EditorConstants.AddressablesModuleDefine),
             ("DOTween", EditorConstants.EffectsModuleDefine),
             ("R3", EditorConstants.R3ModuleDefine),
+            ("DraasGames.DLogger", EditorConstants.DLoggerModuleDefine),
         };
     
         static LibraryDefineManager()

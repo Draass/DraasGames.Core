@@ -1,5 +1,5 @@
-{
-    "name": "Tests1",
+﻿{
+    "name": "DraasGames.Core.Tests.EditMode",
     "rootNamespace": "",
     "references": [
         "GUID:489d96895ffc93e4cb33c2d607bc5217",

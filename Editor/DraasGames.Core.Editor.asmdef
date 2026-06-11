@@ -1,5 +1,5 @@
 {
-    "name": "NewAssembly",
+    "name": "DraasGames.Core.Editor",
     "references": [
         "DraasGames.Core"
     ],
