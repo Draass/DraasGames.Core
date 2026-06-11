@@ -38,9 +38,9 @@ These dependencies are optional and depend on what modules you will activate
 5. StateMachineAsync
 
 ## DLogger (moved to a separate package)
-DLogger (tagged logging + custom console window) now lives in its own package: https://github.com/Draass/DraasGames.DLogger
+DLogger (tagged logging + custom console window) now lives in its own package: https://github.com/Draass/DLogger
 
-Install it via git URL: `https://github.com/Draass/DraasGames.DLogger.git#v0.1.0`
+Install it via git URL: `https://github.com/Draass/DLogger.git#v0.1.0`
 
 When DLogger is present in the project, Core automatically routes its internal logging through it (via the `DRAASGAMES_DLOGGER` define); otherwise it falls back to `UnityEngine.Debug`.
 
