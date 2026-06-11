@@ -3,7 +3,7 @@
 ## [0.4.0] - 2026-06-11
 
 ### Changed
-- BREAKING: DLogger extracted to a standalone package `com.draasgames.dlogger` (https://github.com/Draass/DraasGames.DLogger). Install it to restore DLogger-backed logging in Core (detected automatically via the DRAASGAMES_DLOGGER define); without it Core falls back to UnityEngine.Debug. DLogger namespaces changed from `DraasGames.Core.Runtime.Infrastructure.Logger` to `DraasGames.Logging`.
+- BREAKING: DLogger extracted to a standalone package `com.draasgames.dlogger` (https://github.com/Draass/DLogger). Install it to restore DLogger-backed logging in Core (detected automatically via the DRAASGAMES_DLOGGER define); without it Core falls back to UnityEngine.Debug. DLogger namespaces changed from `DraasGames.Core.Runtime.Infrastructure.Logger` to `DraasGames.Logging`.
 - Editor and test assembly definitions renamed (NewAssembly -> DraasGames.Core.Editor, Tests1 -> DraasGames.Core.Tests.EditMode)
 
 ## [0.3.8] - 2026-04-27
