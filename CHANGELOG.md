@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.1] - 2026-09-28
+
+### Fixed
+- Fixed UAC1012 compilation error in Unity 6.6 and newer by explicitly using Odin serialization for the `ResourcesViewContainer` view-path dictionary. Earlier Unity versions retain `[SerializeField]`; the existing field name and data format are preserved.
+
 ## [0.4.0] - 2026-06-11
 
 ### Changed
