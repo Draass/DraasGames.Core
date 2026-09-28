@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d6b8ef6d4394874eb0b2a269f2f7d77, type: 3}
+  m_Script: {fileID: 11500000, guid: 095e526ba68747d39fcd06bb966bfcf7, type: 3}
   m_Name: DLoggerSettings
   m_EditorClassIdentifier: 
   _minimumLevel: 0

@@ -8,6 +8,7 @@ using DraasGames.Core.Runtime.UI.Views.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers;
 using NSubstitute;
 using NUnit.Framework;
+using Sirenix.Serialization;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,6 +17,39 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
     [TestFixture]
     public class ResourcesViewContainerTest
     {
+        [TestCase(DataFormat.Binary)]
+        [TestCase(DataFormat.JSON)]
+        public void ViewPaths_ShouldSurviveOdinSerialization(DataFormat format)
+        {
+            var source = ScriptableObject.CreateInstance<ResourcesViewContainer>();
+            var restored = ScriptableObject.CreateInstance<ResourcesViewContainer>();
+            try
+            {
+                var field = typeof(ResourcesViewContainer).GetField("_viewPathsPair",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                Assert.That(field, Is.Not.Null);
+                var paths = (Dictionary<Type, string>)field.GetValue(source);
+                paths[typeof(MyView1)] = "Views/Main";
+                paths[typeof(View)] = "Views/Secondary";
+
+                byte[] bytes = null;
+                List<UnityEngine.Object> references = null;
+                UnitySerializationUtility.SerializeUnityObject(source, ref bytes,
+                    ref references, format);
+                UnitySerializationUtility.DeserializeUnityObject(restored, ref bytes,
+                    ref references, format);
+
+                Assert.That(restored.GetViewPath<MyView1>(), Is.EqualTo("Views/Main"));
+                Assert.That(restored.GetViewPath(typeof(MyView1)), Is.EqualTo("Views/Main"));
+                Assert.That(restored.GetViewPath(typeof(View)), Is.EqualTo("Views/Secondary"));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(source);
+                UnityEngine.Object.DestroyImmediate(restored);
+            }
+        }
+
         [Test]
         public void Test_GetViewPath_ShouldReturnCorrectPathForValidView()
         {

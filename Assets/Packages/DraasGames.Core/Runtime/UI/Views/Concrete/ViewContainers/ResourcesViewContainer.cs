@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders;
 using Sirenix.OdinInspector;
+#if UNITY_6000_6_OR_NEWER
+using Sirenix.Serialization;
+#endif
 using UnityEngine;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
@@ -13,7 +16,12 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
         [SerializeField, BoxGroup("Add View")]
         private IViewBase _viewToAdd;
 
+#if UNITY_6000_6_OR_NEWER
+        // System.Type keys must be serialized by Odin, not Unity's dictionary serializer.
+        [NonSerialized, OdinSerialize]
+#else
         [SerializeField]
+#endif
         private Dictionary<Type, string> _viewPathsPair = new();
 
 #if UNITY_EDITOR
