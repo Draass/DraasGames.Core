@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.4.1] - 2026-09-28
+
+### Fixed
+- Fixed UAC1012 compilation error in Unity 6.6 and newer by explicitly using Odin serialization for the `ResourcesViewContainer` view-path dictionary. Earlier Unity versions retain `[SerializeField]`; the existing field name and data format are preserved.
+
+## [0.4.0] - 2026-06-11
+
+### Changed
+- BREAKING: DLogger extracted to a standalone package `com.draasgames.dlogger` (https://github.com/Draass/DLogger). Install it to restore DLogger-backed logging in Core (detected automatically via the DRAASGAMES_DLOGGER define); without it Core falls back to UnityEngine.Debug. DLogger namespaces changed from `DraasGames.Core.Runtime.Infrastructure.Logger` to `DraasGames.Logging`.
+- Editor and test assembly definitions renamed (NewAssembly -> DraasGames.Core.Editor, Tests1 -> DraasGames.Core.Tests.EditMode)
+
+## [0.3.8] - 2026-04-27
+
+### Added
+- Parameterized ViewRouter flow with IView<TParam> and parameterized ShowAsync, ShowModalAsync, and ShowPersistentAsync
+- ViewRouter OnViewShown and OnViewHidden events
+- Optional ViewRouter view caching through ICacheableView and ResetStateAsync
+- ViewRouter cache management API: IsCached, PreloadAsync, ReleaseCached, ReleaseAllCached
+- IDestroyableView lifecycle contract with default ViewBase implementation
+- Pooling infrastructure with IPoolService, IPoolable, PoolOptions, and Addressables-based pool registration
+- Reflex integration installers and instantiator adapter
+- VContainer integration installers and instantiator adapter
+- Zenject integration asmdef, instantiator adapter, and suffixed installer aliases
+- DLogger settings asset, minimum log level filtering, DLogLevel.None, and editor settings provider
+- CustomToggle None toggle mode
+
+### Changed
+- Core package is now DI-agnostic, with container-specific code moved under Runtime/Integrations
+- ViewRouter public generic constraints now target view interfaces instead of MonoBehaviour
+- ViewRouter transition handling now serializes concurrent show requests
+- Hidden ViewBase instances now disable GraphicRaycaster
+- VContainer Addressables installers now use scoped lifetime by default
+
+### Fixed
+- Repeated rapid ShowAsync calls for the same view no longer create duplicate active views
+- Switching between regular views no longer leaves the previous regular view active
+
 ## [0.3.7] - 2025-09-12
 
 ### Fixed

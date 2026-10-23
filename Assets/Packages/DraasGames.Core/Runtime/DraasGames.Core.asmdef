@@ -3,13 +3,13 @@
     "rootNamespace": "",
     "references": [
         "DOTween.Modules",
-        "Zenject",
         "Sirenix.OdinInspector.Modules.Unity.Addressables",
         "UniTask",
         "UnityEngine.UI",
         "Unity.Addressables",
         "Unity.TextMeshPro",
-        "Unity.ResourceManager"
+        "Unity.ResourceManager",
+        "DraasGames.DLogger"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,6 +18,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.draasgames.dlogger",
+            "expression": "",
+            "define": "DRAASGAMES_DLOGGER"
+        }
+    ],
     "noEngineReferences": false
 }

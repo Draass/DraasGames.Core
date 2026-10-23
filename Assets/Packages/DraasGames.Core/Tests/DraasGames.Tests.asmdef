@@ -1,5 +1,5 @@
-{
-    "name": "Tests1",
+﻿{
+    "name": "DraasGames.Core.Tests.EditMode",
     "rootNamespace": "",
     "references": [
         "GUID:489d96895ffc93e4cb33c2d607bc5217",
@@ -7,7 +7,6 @@
         "GUID:0acc523941302664db1f4e527237feb3",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:9a88817da2cdeb94388ab1c4165583ac",
-        "GUID:0d8beb7f090555447a6cf5ce9e54dbb4",
         "GUID:f6707c553959926459cddc238f5c65fd"
     ],
     "includePlatforms": [
@@ -19,6 +18,7 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Sirenix.Serialization.dll",
+        "Sirenix.Serialization.Config.dll",
         "Sirenix.OdinInspector.Attributes.dll"
     ],
     "autoReferenced": false,

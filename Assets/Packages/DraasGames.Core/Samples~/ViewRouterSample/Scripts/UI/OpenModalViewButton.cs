@@ -25,8 +25,8 @@ namespace DraasGames.Core.Samples.Scripts
         
         private Type[] GetDerivedTypes()
         {
-            // Assume View is your base type
-            Type baseType = typeof(View);
+            // Assume ViewBase is your base type
+            Type baseType = typeof(ViewBase);
         
             // Get all derived types from the current assembly
             var derivedTypes = AppDomain.CurrentDomain.GetAssemblies()

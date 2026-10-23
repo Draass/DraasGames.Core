@@ -3,21 +3,31 @@ using Cysharp.Threading.Tasks;
 
 namespace DraasGames.Core.Runtime.UI.Views.Abstract
 {
-    public interface IView
+    public interface IViewBase
     {
-        public event Action OnViewShow;
-        public event Action OnViewHide;
+        event Action OnViewShow;
+        event Action OnViewHide;
 
-        [Obsolete("This API is deprecated and is replaced with async overload. " +
-                  "Consider using ShowAsync instead.")]
-        public void Show();
-        
-        public UniTask ShowAsync();
+        UniTask HideAsync();
+    }
 
-        [Obsolete("This API is deprecated and is replaced with async overload. " +
-                  "Consider using HideAsync instead.")]
-        public void Hide();
+    public interface ICacheableView : IViewBase
+    {
+        UniTask ResetStateAsync() => UniTask.CompletedTask;
+    }
 
-        public UniTask HideAsync();
+    public interface IDestroyableView : IViewBase
+    {
+        void DestroyView();
+    }
+
+    public interface IView : IViewBase
+    {
+        UniTask ShowAsync();
+    }
+
+    public interface IView<in TParam> : IViewBase
+    {
+        UniTask ShowAsync(TParam param);
     }
 }

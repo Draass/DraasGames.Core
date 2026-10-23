@@ -1,3 +1,4 @@
+#if DRAASGAMES_ZENJECT_ENABLED
 using System;
 using Cysharp.Threading.Tasks;
 using DraasGames.Core.Runtime.UI.PresenterNavigationService.Abstract;
@@ -37,3 +38,4 @@ namespace DraasGames.Core.Samples.Scripts
         }
     }
 }
+#endif

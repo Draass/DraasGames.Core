@@ -1,10 +1,14 @@
-﻿using DraasGames;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using DraasGames;
 using DraasGames.Core.Runtime.UI.Views;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using DraasGames.Core.Runtime.UI.Views.Concrete;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers;
 using NSubstitute;
 using NUnit.Framework;
+using Sirenix.Serialization;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,22 +17,55 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
     [TestFixture]
     public class ResourcesViewContainerTest
     {
+        [TestCase(DataFormat.Binary)]
+        [TestCase(DataFormat.JSON)]
+        public void ViewPaths_ShouldSurviveOdinSerialization(DataFormat format)
+        {
+            var source = ScriptableObject.CreateInstance<ResourcesViewContainer>();
+            var restored = ScriptableObject.CreateInstance<ResourcesViewContainer>();
+            try
+            {
+                var field = typeof(ResourcesViewContainer).GetField("_viewPathsPair",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                Assert.That(field, Is.Not.Null);
+                var paths = (Dictionary<Type, string>)field.GetValue(source);
+                paths[typeof(MyView1)] = "Views/Main";
+                paths[typeof(View)] = "Views/Secondary";
+
+                byte[] bytes = null;
+                List<UnityEngine.Object> references = null;
+                UnitySerializationUtility.SerializeUnityObject(source, ref bytes,
+                    ref references, format);
+                UnitySerializationUtility.DeserializeUnityObject(restored, ref bytes,
+                    ref references, format);
+
+                Assert.That(restored.GetViewPath<MyView1>(), Is.EqualTo("Views/Main"));
+                Assert.That(restored.GetViewPath(typeof(MyView1)), Is.EqualTo("Views/Main"));
+                Assert.That(restored.GetViewPath(typeof(View)), Is.EqualTo("Views/Secondary"));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(source);
+                UnityEngine.Object.DestroyImmediate(restored);
+            }
+        }
+
         [Test]
         public void Test_GetViewPath_ShouldReturnCorrectPathForValidView()
         {
             // Arrange
             var container = ScriptableObject.CreateInstance<ResourcesViewContainer>();
-    
-            var prefabGameObject = new GameObject("MyViewPrefab");
-            var myViewComponent = prefabGameObject.AddComponent<MyView1>();
-            
-
             var expectedPath = "path/to/view";
-            
-            container.AddView(myViewComponent);
-            // container._views.Add(myViewComponent);
-            // container._viewPaths.Add(expectedPath);
-            // container._viewPathsPair.Add(myViewComponent.GetType(), expectedPath);
+            var field = typeof(ResourcesViewContainer).GetField("_viewPathsPair",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            var viewPaths = field?.GetValue(container) as Dictionary<Type, string>;
+            if (viewPaths == null)
+            {
+                viewPaths = new Dictionary<Type, string>();
+                field?.SetValue(container, viewPaths);
+            }
+
+            viewPaths[typeof(MyView1)] = expectedPath;
 
             // Act
             var result = container.GetViewPath<MyView1>();
@@ -36,13 +73,13 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Assert
             Assert.AreEqual(expectedPath, result, "GetViewPath should return the correct path for a valid view.");
         }
-        
+
         public void Test_OnValidate_ShouldPopulateViewPaths()
         {
             // Arrange
             var container = ScriptableObject.CreateInstance<ResourcesViewContainer>();
-            var mockView1 = Substitute.For<IView>();
-            var mockView2 = Substitute.For<IView>();
+            var mockView1 = Substitute.For<IViewBase>();
+            var mockView2 = Substitute.For<IViewBase>();
 
             // container._views.Add(mockView1);
             // container._views.Add(mockView2);
@@ -59,7 +96,7 @@ namespace _Project.Scripts.DraasGames.Tests.EditMode
             // Assert.AreEqual("path/to/view1", container._viewPaths[0], "OnValidate should correctly map the first view path.");
             // Assert.AreEqual("path/to/view2", container._viewPaths[1], "OnValidate should correctly map the second view path.");
         }
-        
+
         [Test]
         public void Test_EmptyViewsList_ShouldNotThrow()
         {

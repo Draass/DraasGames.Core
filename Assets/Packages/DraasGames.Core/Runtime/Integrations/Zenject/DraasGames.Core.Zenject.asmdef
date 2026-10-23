@@ -1,0 +1,20 @@
+{
+    "name": "DraasGames.Core.Zenject",
+    "rootNamespace": "",
+    "references": [
+        "DraasGames.Core",
+        "Zenject",
+        "Sirenix.OdinInspector.Modules.Unity.Addressables"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "DRAASGAMES_ZENJECT_ENABLED"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

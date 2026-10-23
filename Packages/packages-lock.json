@@ -1,11 +1,34 @@
 {
   "dependencies": {
+    "com.coplaydev.unity-mcp": {
+      "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.test-framework": "1.1.31"
+      },
+      "hash": "78ee5418415953b79c358bfe6355fcc3fde7912b"
+    },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,
       "source": "git",
       "dependencies": {},
       "hash": "b0d01ca75fc890b76e81202d655d17c1f4214a18"
+    },
+    "com.draasgames.dlogger": {
+      "version": "file:com.draasgames.dlogger",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.gustavopsantos.reflex": {
+      "version": "https://github.com/gustavopsantos/reflex.git?path=/Assets/Reflex/#14.3.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "86569ca217b989a8cec9db1e37f81c44130d23f1"
     },
     "com.unity.addressables": {
       "version": "2.2.2",
@@ -45,6 +68,13 @@
       "dependencies": {
         "com.unity.modules.uielements": "1.0.0"
       }
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
     },
     "com.unity.profiling.core": {
       "version": "1.0.2",
@@ -96,6 +126,13 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
+    },
+    "jp.hadashikick.vcontainer": {
+      "version": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer#1.17.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "177dbda557fd652ce7f5d1647a3621653e094373"
     },
     "net.tnrd.nsubstitute": {
       "version": "https://github.com/Thundernerd/Unity3D-NSubstitute.git",

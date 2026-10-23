@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using DraasGames.Core.Runtime.UI.Views.Abstract;
 using DraasGames.Core.Runtime.UI.Views.Concrete.ViewProviders;
 using Sirenix.OdinInspector;
+#if UNITY_6000_6_OR_NEWER
+using Sirenix.Serialization;
+#endif
 using UnityEngine;
 
 namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
@@ -11,44 +14,49 @@ namespace DraasGames.Core.Runtime.UI.Views.Concrete.ViewContainers
     public class ResourcesViewContainer : SerializedScriptableObject
     {
         [SerializeField, BoxGroup("Add View")]
-        private IView _viewToAdd;
-        
+        private IViewBase _viewToAdd;
+
+#if UNITY_6000_6_OR_NEWER
+        // System.Type keys must be serialized by Odin, not Unity's dictionary serializer.
+        [NonSerialized, OdinSerialize]
+#else
         [SerializeField]
+#endif
         private Dictionary<Type, string> _viewPathsPair = new();
 
-#if UNITY_EDITOR  
+#if UNITY_EDITOR
         private IViewPathRetrieveStrategy _pathRetrieveStrategy = new ResourcesViewPathRetrieveStrategy();
 #endif
-        
-        public string GetViewPath<T>()
+
+        public string GetViewPath<T>() where T : IViewBase
         {
             return _viewPathsPair[typeof(T)];
         }
-        
+
         public string GetViewPath(Type viewType)
         {
-            if (!viewType.IsAssignableFrom(typeof(MonoBehaviour)))
+            if (!typeof(MonoBehaviour).IsAssignableFrom(viewType))
                 throw new ArgumentException($"Type {viewType} is not a MonoBehaviour");
-            
-            if(!viewType.IsAssignableFrom(typeof(IView)))
-                throw new ArgumentException($"Type {viewType} is not an IView");
-            
+
+            if (!typeof(IViewBase).IsAssignableFrom(viewType))
+                throw new ArgumentException($"Type {viewType} is not an IViewBase");
+
             return _viewPathsPair[viewType];
         }
-        
-#if UNITY_EDITOR  
+
+#if UNITY_EDITOR
         [Button, BoxGroup("Add View")]
         private void EditorAddView()
         {
             AddView(_viewToAdd);
         }
-        
-        public void AddView(IView view)
+
+        public void AddView(IViewBase view)
         {
             Type derivedType = view.GetType();
-            
+
             var path = _pathRetrieveStrategy.RetrieveViewPath(view);
-            
+
             if (_viewPathsPair.TryGetValue(derivedType, out var viewPath))
             {
                 _viewPathsPair[derivedType] = path;

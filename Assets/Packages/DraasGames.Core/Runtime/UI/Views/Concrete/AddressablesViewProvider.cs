@@ -19,7 +19,7 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
         private readonly IScopeLifetimeProvider _scopeLifetimeProvider;
 
         public AddressablesViewProvider(
-            IAssetLoader assetLoader, 
+            IAssetLoader assetLoader,
             IViewAssetReferenceProvider assetReferenceProvider,
             IScopeLifetimeProvider scopeLifetimeProvider)
         {
@@ -27,23 +27,28 @@ namespace DraasGames.Core.Runtime.Infrastructure.Installers
             _assetReferenceProvider = assetReferenceProvider;
             _scopeLifetimeProvider = scopeLifetimeProvider;
         }
-        
-        public async UniTask<T> GetViewAsync<T>() where T : MonoBehaviour, IView
+
+        public async UniTask<T> GetViewAsync<T>() where T : IViewBase
         {
             var viewReference = _assetReferenceProvider.GetAssetReference(typeof(T));
 
-            var view = await _assetLoader.LoadWithComponentAsync<T>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
-            
+            var go = await _assetLoader.LoadAsync<GameObject>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
+            var component = go.GetComponent(typeof(T)) as IViewBase;
+            if (component is not T view)
+            {
+                throw new NullReferenceException($"Can't get {typeof(T).Name} from {go.name}");
+            }
+
             return view;
         }
 
-        public async UniTask<IView> GetViewAsync(Type viewType)
+        public async UniTask<IViewBase> GetViewAsync(Type viewType)
         {
             var viewReference = _assetReferenceProvider.GetAssetReference(viewType);
 
             var go = await _assetLoader.LoadAsync<GameObject>(viewReference, _scopeLifetimeProvider.ScopeLifetime);
 
-            var component = go.GetComponent(viewType) as IView;
+            var component = go.GetComponent(viewType) as IViewBase;
             if (component == null)
             {
                 throw new NullReferenceException($"Can't get {viewType.Name} from {go.name}");
