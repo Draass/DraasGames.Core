@@ -30,6 +30,18 @@ These dependencies are optional and depend on what modules you will activate
 - Or download and import unity package from releases
 3. Enjoy 
 
+## Releasing
+
+Set the package version in `Assets/Packages/DraasGames.Core/package.json`, add its
+section to `CHANGELOG.md`, and merge the changes into `master`. Create and push an
+annotated tag with that exact version, without a `v` prefix (for example `0.4.1`).
+
+The Release workflow checks that the tag belongs to `master` and matches the
+package version. It publishes the matching changelog section as a GitHub release,
+updates the `upm` branch, and creates `upm/v<version>`. Pushing `master` alone does
+not publish or change the package version. To retry an existing tag, rerun its
+workflow or select it in the Release workflow's manual `tag` input.
+
 # Modules that are implemented
 1. ViewRouter is usable except of Preloading functionality and addressables support, which will be added later
 2. CustomButton and CustomToggle for enabling use of custom effects and enhanching toggle functionality

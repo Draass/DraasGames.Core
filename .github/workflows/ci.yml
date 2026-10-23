@@ -3,55 +3,80 @@
 # origin license https://github.com/adrenak/upm-template/blob/master/LICENSE
 # you can read more about how to use upm-template at https://github.com/adrenak/upm-template/
 
-name: CI
+name: Release
 on:
   push:
-    branches:
-    - master
-    paths-ignore:
-    - 'Packages/com.draasgames.dlogger/**'
+    tags:
+      - '[0-9]*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag, for example 0.4.1'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: package-release
+  cancel-in-progress: false
+
 jobs:
   release:
-    if: "!contains(github.event.head_commit.message, 'skip ci')"
     name: Release
     runs-on: ubuntu-latest
+    env:
+      PKG_ROOT: Assets/Packages/DraasGames.Core
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       with:
+        ref: refs/tags/${{ inputs.tag || github.ref_name }}
         fetch-depth: 0
 
-    - name: Semantic Release
-      id: semantic
-      uses: cycjimmy/semantic-release-action@v3.4.2
-      with:
-        extra_plugins: |
-          @semantic-release/changelog
-          @semantic-release/git
-        branch: master
+    - name: Validate release tag and package
+      id: release
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+      run: node .github/scripts/prepare-release.mjs
 
-    - name: Create UPM branch
+    - name: Publish UPM branch and tag
+      env:
+        RELEASE_COMMIT: ${{ steps.release.outputs.commit }}
+      shell: bash
       run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        
-        git branch -d upm &> /dev/null || echo upm branch not found
-        git subtree split -P "$PKG_ROOT" -b upm
-        git checkout upm
-        if [[ -d "Samples" ]]; then
-          git mv Samples Samples~
-          rm -f Samples.meta
-          git commit -am "fix: Samples => Samples~"
+        set -euo pipefail
+        upm_commit=$(git subtree split --prefix="$PKG_ROOT" "$RELEASE_COMMIT")
+        upm_tag="upm/v$RELEASE_TAG"
+
+        if [[ "$(git rev-parse "$upm_commit^{tree}")" != "$(git rev-parse "$RELEASE_COMMIT:$PKG_ROOT")" ]]; then
+          echo 'UPM tree does not match the tagged package.' >&2
+          exit 1
         fi
-        git push -f -u origin upm
-      env:
-        PKG_ROOT: "Assets/Packages/DraasGames.Core"
 
-    - name: Create UPM git tag
-      if: steps.semantic.outputs.new_release_published == 'true'
-      run: |
-        git tag $TAG upm
-        git push origin --tags
+        if git show-ref --verify --quiet "refs/tags/$upm_tag"; then
+          if [[ "$(git rev-parse "$upm_tag^{commit}")" != "$upm_commit" ]]; then
+            echo "Existing $upm_tag points to a different commit." >&2
+            exit 1
+          fi
+        else
+          git tag "$upm_tag" "$upm_commit"
+        fi
+
+        git push --atomic origin "$upm_commit:refs/heads/upm" "refs/tags/$upm_tag"
+
+    - name: Publish GitHub release
       env:
-        TAG: upm/v${{ steps.semantic.outputs.new_release_version }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+      shell: bash
+      run: |
+        set -euo pipefail
+        if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --title "$RELEASE_TAG" --notes-file "$RELEASE_NOTES_PATH" --latest
+        else
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --verify-tag --title "$RELEASE_TAG" --notes-file "$RELEASE_NOTES_PATH" --latest
+        fi

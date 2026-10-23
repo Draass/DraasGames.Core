@@ -1,6 +1,6 @@
 {
   "name": "com.draasgames.core",
-  "version": "1.0.0",
+  "version": "0.4.1",
   "displayName": "DraasGames.Core",
   "description": "A package of useful scripts and systems for rapid project development",
   "keywords": [
@@ -11,7 +11,8 @@
     "name": "Evgenii Agaev",
     "email": "draas.games@gmail.com"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
   "samples": [
     {
       "displayName": "ViewRouter Sample",
